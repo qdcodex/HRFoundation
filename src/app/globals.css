@@ -1,0 +1,230 @@
+@import "tailwindcss";
+
+/*
+ * H R Foundation design system — "A Future Built on Compassion"
+ * Colour tokens are tuned for WCAG AA contrast:
+ *  - emerald-ink (#1C6E55) is the text/link variant of emerald on light backgrounds
+ *  - gold-ink (#86662C) is the text variant of the gold accent on light backgrounds
+ *  - gold (#C7A56A) is used on forest backgrounds or decoratively only
+ */
+@theme {
+  --color-forest: #153d32;
+  --color-forest-deep: #0e2a22;
+  --color-forest-soft: #1f4c3f;
+  --color-emerald: #238568;
+  --color-emerald-ink: #1c6e55;
+  --color-ivory: #f8f6f0;
+  --color-ivory-deep: #efebe0;
+  --color-sage: #dde8de;
+  --color-sage-deep: #c5d6c8;
+  --color-charcoal: #252b28;
+  --color-muted: #55605a;
+  --color-line: #ddd7c8;
+  --color-gold: #c7a56a;
+  --color-gold-soft: #ead9b6;
+  --color-gold-ink: #86662c;
+  --color-danger: #a8322a;
+
+  --font-display: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-arch: 999px 999px 0 0;
+
+  --animate-rise: rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  --animate-fade-in: fade-in 0.4s ease-out both;
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-ivory);
+    color: var(--color-charcoal);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: var(--color-gold-soft);
+    color: var(--color-forest-deep);
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-gold);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .container-site {
+    width: 100%;
+    max-width: 80rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 640px) {
+    .container-site {
+      padding-inline: 2rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .container-site {
+      padding-inline: 3rem;
+    }
+  }
+
+  .eyebrow {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .display-xl {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 0.98;
+    font-size: clamp(2.5rem, 5.6vw, 5.25rem);
+  }
+
+  .display-lg {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.04;
+    font-size: clamp(2rem, 4.6vw, 3.5rem);
+  }
+
+  .display-md {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.12;
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+  }
+
+  .prose-site {
+    font-size: 1.0625rem;
+    line-height: 1.75;
+    color: var(--color-charcoal);
+  }
+  .prose-site > * + * {
+    margin-top: 1.1em;
+  }
+  .prose-site h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 2.2em;
+    color: var(--color-forest);
+  }
+  .prose-site h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-top: 1.8em;
+    color: var(--color-forest);
+  }
+  .prose-site ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  .prose-site ul > li {
+    position: relative;
+    padding-left: 1.5rem;
+  }
+  .prose-site ul > li + li {
+    margin-top: 0.5rem;
+  }
+  .prose-site ul > li::before {
+    content: "";
+    position: absolute;
+    left: 0.25rem;
+    top: 0.72em;
+    width: 0.5rem;
+    height: 2px;
+    background: var(--color-gold);
+  }
+  .prose-site a {
+    color: var(--color-emerald-ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .link-underline {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1.5px;
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    transition: background-size 0.3s ease;
+  }
+  .link-underline:hover,
+  .link-underline:focus-visible {
+    background-size: 100% 1.5px;
+  }
+
+  .grain {
+    position: relative;
+    isolation: isolate;
+  }
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: radial-gradient(currentColor 0.6px, transparent 0.6px);
+    background-size: 14px 14px;
+  }
+}

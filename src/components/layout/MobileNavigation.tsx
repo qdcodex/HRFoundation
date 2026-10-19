@@ -33,10 +33,14 @@ export function MobileNavigation({ nav, pathname }: { nav: NavItem[]; pathname: 
   return (
     <div className="flex items-center gap-2 xl:hidden">
       <span className="hidden sm:block">
-        <Link href="/donate" className={buttonClasses("primary", "md", "h-10 px-5")}>
+        <Link href="/donate" className={buttonClasses("outline", "md", "h-10 px-4")}>
           Donate
         </Link>
       </span>
+      <Link href="/membership" className={buttonClasses("gold", "md", "h-10 px-4")}>
+        <span className="sm:hidden">Join</span>
+        <span className="hidden sm:inline">Become a member</span>
+      </Link>
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -119,10 +123,10 @@ export function MobileNavigation({ nav, pathname }: { nav: NavItem[]; pathname: 
           </nav>
 
           <div className="grid grid-cols-2 gap-3 border-t border-line p-5">
-            <Link href="/membership" onClick={close} className={buttonClasses("outline", "lg")}>
-              Membership
+            <Link href="/membership" onClick={close} className={buttonClasses("gold", "lg")}>
+              Become a member
             </Link>
-            <Link href="/donate" onClick={close} className={buttonClasses("primary", "lg")}>
+            <Link href="/donate" onClick={close} className={buttonClasses("outline", "lg")}>
               Donate
             </Link>
           </div>

@@ -13,6 +13,8 @@ import { toMembershipView } from "@/lib/membership-view";
 import { publicSettings } from "@/lib/settings";
 import { cmsPageMetadata } from "@/lib/metadata";
 import { getPage } from "@/lib/cms";
+import { MembershipFaq } from "@/components/sections/MembershipFaq";
+import { MobileApplyBar } from "@/components/forms/MobileApplyBar";
 
 export function generateMetadata() {
   return cmsPageMetadata("membership", "/membership");
@@ -170,13 +172,30 @@ export default async function MembershipPage() {
         </div>
       </section>
 
+      <section id="faq" className="scroll-mt-24 bg-sage py-16 sm:py-24" aria-labelledby="faq-heading">
+        <div className="container-site grid gap-10 lg:grid-cols-12">
+          <div className="lg:col-span-4">
+            <SectionHeading
+              id="faq-heading"
+              index="05"
+              eyebrow="Questions"
+              title="Before you join."
+              intro="Straight answers to the questions people ask most. If anything is unclear, contact us before you apply."
+            />
+          </div>
+          <div className="lg:col-span-8">
+            <MembershipFaq m={m} />
+          </div>
+        </div>
+      </section>
+
       <section id="register" className="scroll-mt-24 bg-ivory py-16 sm:py-24" aria-labelledby="register-heading">
         <div className="container-site grid gap-12 lg:grid-cols-12">
           <div className="lg:col-span-4">
             <div className="lg:sticky lg:top-28">
               <SectionHeading
                 id="register-heading"
-                index="05"
+                index="06"
                 eyebrow="Registration"
                 title="Apply for membership."
                 intro={
@@ -196,6 +215,7 @@ export default async function MembershipPage() {
           </div>
         </div>
       </section>
+      <MobileApplyBar label={m.registrationOpen ? "Apply for membership" : "Register your interest"} />
     </>
   );
 }

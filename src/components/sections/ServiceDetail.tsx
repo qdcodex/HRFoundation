@@ -8,6 +8,7 @@ import { ServiceIcon } from "@/components/ui/ServiceIcon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EmptyState, PendingNote } from "@/components/ui/States";
 import { CallToAction } from "./CallToAction";
+import { SiteMembershipBanner } from "./MembershipPromo";
 import { PageHero } from "./PageHero";
 
 type Section = { id: string; label: string };
@@ -215,6 +216,7 @@ export async function ServiceDetail({
         </div>
       </div>
 
+      {service.slug !== "membership-support" && <SiteMembershipBanner />}
       <CallToAction />
     </>
   );

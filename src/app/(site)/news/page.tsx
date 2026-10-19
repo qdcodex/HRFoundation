@@ -1,4 +1,5 @@
 import { CallToAction } from "@/components/sections/CallToAction";
+import { SiteMembershipBanner } from "@/components/sections/MembershipPromo";
 import { PageHero } from "@/components/sections/PageHero";
 import { UpdatesList } from "@/components/sections/UpdatesList";
 import { getNews } from "@/lib/cms";
@@ -24,6 +25,7 @@ export default async function NewsPage() {
           <UpdatesList items={news} headingLevel="h2" />
         </div>
       </section>
+      <SiteMembershipBanner />
       <CallToAction />
     </>
   );

@@ -5,9 +5,9 @@ import { Reveal } from "@/components/ui/Reveal";
 /** Closing call-to-action band used at the end of pages. */
 export function CallToAction({
   title = "Every act of kindness builds a better tomorrow.",
-  text = "Stay in touch with H R Foundation, support our mission, or ask us a question. We would be glad to hear from you.",
-  primary = { label: "Support our mission", href: "/donate" },
-  secondary = { label: "Contact us", href: "/contact" },
+  text = "Become a member, support our mission with a donation, or ask us a question. We would be glad to hear from you.",
+  primary = { label: "Become a member", href: "/membership" },
+  secondary = { label: "Donate", href: "/donate" },
 }: {
   title?: ReactNode;
   text?: ReactNode;

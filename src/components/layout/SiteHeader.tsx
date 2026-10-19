@@ -61,11 +61,11 @@ export function SiteHeader({ nav, pathname = "" }: { nav: NavItem[]; pathname?: 
         </nav>
 
         <div className="hidden items-center gap-2 xl:flex">
-          <Link href="/membership" className={buttonClasses("outline", "md", "h-10 px-4")}>
-            Membership
-          </Link>
-          <Link href="/donate" className={buttonClasses("primary", "md", "h-10 px-5")}>
+          <Link href="/donate" className={buttonClasses("outline", "md", "h-10 px-4")}>
             Donate
+          </Link>
+          <Link href="/membership" className={buttonClasses("gold", "md", "h-10 px-5")}>
+            Become a member
           </Link>
         </div>
 

@@ -1,5 +1,6 @@
 import { CalendarClock, MapPin } from "lucide-react";
 import { CallToAction } from "@/components/sections/CallToAction";
+import { SiteMembershipBanner } from "@/components/sections/MembershipPromo";
 import { PageHero } from "@/components/sections/PageHero";
 import { ButtonLink } from "@/components/ui/Button";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -80,6 +81,7 @@ export default async function ActivitiesPage() {
         </div>
       </section>
 
+      <SiteMembershipBanner />
       <CallToAction />
     </>
   );

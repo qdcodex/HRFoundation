@@ -37,11 +37,11 @@ export function HeroSection({ title, intro }: { title: string; intro: string }) 
             </h1>
             <p className="mt-9 max-w-xl text-lg leading-relaxed text-muted sm:text-xl">{intro}</p>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <ButtonLink href="/services" size="lg" arrow>
-                Explore our work
+              <ButtonLink href="/membership" size="lg" arrow>
+                Become a member
               </ButtonLink>
-              <ButtonLink href="/donate" size="lg" variant="outline">
-                Support our mission
+              <ButtonLink href="/services" size="lg" variant="outline">
+                Explore our work
               </ButtonLink>
             </div>
           </HeroMotion>

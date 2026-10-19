@@ -1,5 +1,6 @@
 import { Compass, Eye, HeartHandshake, Users } from "lucide-react";
 import { CallToAction } from "@/components/sections/CallToAction";
+import { SiteMembershipBanner } from "@/components/sections/MembershipPromo";
 import { PageHero } from "@/components/sections/PageHero";
 import { RegistrationFacts } from "@/components/sections/RegistrationFacts";
 import { BrandLogo } from "@/components/ui/Brand";
@@ -140,6 +141,7 @@ export default async function AboutPage() {
         </div>
       </section>
 
+      <SiteMembershipBanner />
       <CallToAction />
     </>
   );

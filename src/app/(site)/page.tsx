@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { HandCoins, Handshake, UserRoundPlus } from "lucide-react";
 import { HeroSection } from "@/components/home/HeroSection";
+import { MembershipFeature } from "@/components/sections/MembershipPromo";
+import { toMembershipView } from "@/lib/membership-view";
 import { CallToAction } from "@/components/sections/CallToAction";
 import { ImpactSection } from "@/components/sections/ImpactSection";
 import { ServiceIndex } from "@/components/sections/ServiceIndex";
@@ -26,6 +28,9 @@ export default async function HomePage() {
   return (
     <>
       <HeroSection title={page.title} intro={page.intro} />
+
+      {/* Membership — the foundation's lead invitation */}
+      <MembershipFeature m={toMembershipView(rules)} />
 
       {/* B. Introduction */}
       <section className="border-t border-line bg-ivory py-20 sm:py-28" aria-labelledby="intro-heading">

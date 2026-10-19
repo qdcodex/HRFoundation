@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CallToAction } from "@/components/sections/CallToAction";
+import { SiteMembershipBanner } from "@/components/sections/MembershipPromo";
 import { PageHero } from "@/components/sections/PageHero";
 import { RichText } from "@/components/sections/RichText";
 import { LoadingState } from "@/components/ui/States";
@@ -44,6 +45,7 @@ async function Article({ params }: { params: PageProps<"/news/[slug]">["params"]
           {article.bodyText ? <RichText text={article.bodyText} /> : null}
         </div>
       </section>
+      <SiteMembershipBanner />
       <CallToAction />
     </>
   );

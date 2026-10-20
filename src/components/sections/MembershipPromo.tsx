@@ -18,7 +18,7 @@ export function membershipDisclaimer(m: MembershipView) {
 export function MembershipFeature({ m }: { m: MembershipView }) {
   const steps = [
     { title: "Apply online", text: "Fill in a short form with your details and your nominee's details." },
-    { title: "Pay the membership fee", text: m.feeLabel ? `The fee is ${m.feeLabel}.` : "The foundation will confirm the fee and how to pay." },
+    { title: "Pay the membership fee", text: m.feeLabel ? `The fee is ${m.feeLabel} — no renewals. Open to anyone aged ${m.minApplicantAge} or over.` : "The foundation will confirm the fee and how to pay." },
     { title: "Membership activated", text: "Once your payment is verified and approved, you receive your membership ID." },
     { title: `${m.waitingPeriodMonths}-month waiting period`, text: "Family-support eligibility begins after the waiting period, under the approved rules." },
   ];
@@ -29,7 +29,11 @@ export function MembershipFeature({ m }: { m: MembershipView }) {
       title: `${m.schemeApproved ? "" : "Proposed "}family support up to ${m.maxBenefit}`,
       text: `If a member under ${m.benefitAgeLimit} passes away after the waiting period, their nominee may be considered for support under the approved rules.`,
     },
-    { Icon: ClipboardCheck, title: "Simple and transparent", text: "Clear written terms, a named nominee, and a membership record you can ask about at any time." },
+    {
+      Icon: ClipboardCheck,
+      title: "Simple claim process",
+      text: `The nominee uploads the death certificate online. After verification, the amount is sent to the nominee's bank account — we aim to finish within ${m.claimTargetDays} days.`,
+    },
   ];
 
   return (

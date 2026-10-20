@@ -29,8 +29,7 @@ export default async function Page() {
           <MembershipConditions rules={rules} />
         </div>
         <PendingNote className="mt-6">
-          The membership fee, final rules, exclusions, claim process and funding arrangements are still to be approved by the
-          foundation.
+          The final rules, exclusions and funding arrangements are still to be approved by the foundation.
         </PendingNote>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <ButtonLink href="/membership" arrow>

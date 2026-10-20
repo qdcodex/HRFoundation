@@ -27,8 +27,8 @@ export default async function MembershipTermsPage() {
         <div className="container-site grid gap-12 lg:grid-cols-12">
           <article className="prose-site lg:col-span-8">
             <PendingNote>
-              <strong>Draft for approval.</strong> The foundation must approve the final rules, exclusions, claim process, funding
-              arrangements and legal disclaimers before the scheme becomes operational. Legal review is recommended.
+              <strong>Draft for approval.</strong> The foundation must approve the final rules, exclusions, funding arrangements and
+              legal disclaimers before the scheme becomes operational. Legal review is recommended.
             </PendingNote>
 
             <h2>1. Nature of the scheme</h2>
@@ -41,9 +41,7 @@ export default async function MembershipTermsPage() {
             <h2>2. Membership</h2>
             <ul>
               <li>
-                Membership fee:{" "}
-                {(m.feeLabel ?? "to be confirmed by the foundation")}
-                .
+                Membership fee: {m.feeLabel ?? "to be confirmed by the foundation"}.
               </li>
               <li>Applicants must be at least {m.minApplicantAge} years old and provide accurate information.</li>
               <li>
@@ -77,6 +75,23 @@ export default async function MembershipTermsPage() {
               Members must name a nominee and confirm that the nominee has agreed to share their details. Nominee details and
               claim documents are confidential and are used only to administer the scheme.
             </p>
+            <ol>
+              <li>
+                The nominee submits the claim on the <Link href="/membership#submit-claim">membership page</Link> with the
+                member&apos;s membership ID, the nominee&apos;s registered mobile number and a copy of the death certificate.
+              </li>
+              <li>
+                The foundation verifies the death certificate and the membership, and may ask for further documents if needed.
+              </li>
+              <li>
+                After verification, any approved amount is transferred to the nominee&apos;s bank account. The foundation
+                collects the bank details directly from the nominee during verification.
+              </li>
+              <li>
+                The foundation aims to complete the process within <strong>{m.claimTargetDays} days</strong> of receiving complete
+                documents. Where further documents are requested, this period is counted from when they are received.
+              </li>
+            </ol>
 
             <h2>6. Exclusions</h2>
             <PendingNote>Exclusions are to be defined by the foundation and added here before the scheme is published as operational.</PendingNote>
@@ -100,6 +115,7 @@ export default async function MembershipTermsPage() {
                 <li>{m.waitingPeriodMonths}-month waiting period from activation.</li>
                 <li>Up to {m.maxBenefit}, subject to approved terms.</li>
                 <li>Member under {m.benefitAgeLimit}; claim must be verified.</li>
+                <li>Claims processed within {m.claimTargetDays} days of complete documents.</li>
               </ul>
               <ButtonLink href="/membership#register" variant="gold" className="mt-8 w-full" arrow>
                 Apply for membership

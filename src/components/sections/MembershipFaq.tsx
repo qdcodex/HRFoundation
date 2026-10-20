@@ -17,7 +17,7 @@ export function MembershipFaq({ m }: { m: MembershipView }) {
     },
     {
       q: "What does membership cost?",
-      a: m.feeLabel ? <>The membership fee is {m.feeLabel}. You pay only after your application is received — the foundation will tell you how.</> : <>The fee is being finalised. Apply now and the foundation will contact you with the confirmed fee and how to pay before anything is charged.</>,
+      a: m.feeLabel ? <>The membership fee is {m.feeLabel}. It is paid once — there is no renewal fee. You pay only after your application is received; the foundation will tell you how.</> : <>The fee is being finalised. Apply now and the foundation will contact you with the confirmed fee and how to pay before anything is charged.</>,
     },
     {
       q: "What support could my family receive?",
@@ -26,6 +26,16 @@ export function MembershipFaq({ m }: { m: MembershipView }) {
           {m.schemeApproved ? "Under the approved rules" : "Under the proposed rules"}, if a member passes away after completing the {m.waitingPeriodMonths}
           -month waiting period, their nominee may be considered for support of up to {m.maxBenefit}. A claim must be submitted and verified, and the amount
           depends on the approved terms.
+        </>
+      ),
+    },
+    {
+      q: "How does the nominee make a claim?",
+      a: (
+        <>
+          The nominee submits the claim on this page with the member&apos;s membership ID, their own mobile number (as registered) and a copy of the death
+          certificate. After verification, any approved amount is transferred to the nominee&apos;s bank account. We aim to complete the process within{" "}
+          {m.claimTargetDays} days of receiving complete documents.
         </>
       ),
     },

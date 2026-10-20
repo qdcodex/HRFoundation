@@ -21,6 +21,8 @@ export type ClaimRow = {
   assignedToName: string | null;
   updatedAt: string;
   dateOfDeath: string;
+  sla: string | null;
+  overdue: boolean;
 };
 
 const h = createColumnHelper<typeof tableFeaturesConfig, ClaimRow>();
@@ -41,6 +43,10 @@ export function ClaimsTable(props: { rows: ClaimRow[]; total: number; page: numb
     h.accessor("submittedAt", { header: "Submitted", cell: (i) => fmtDate(i.getValue()) }),
     h.accessor("requestedAmountPaise", { header: "Requested", cell: (i) => (i.getValue() ? formatPaise(i.getValue()) : "—") }),
     h.accessor("status", { header: "Status", cell: (i) => <StatusBadge status={i.getValue()} label={i.row.original.statusLabel} /> }),
+    h.accessor("sla", {
+      header: "Target",
+      cell: (i) => (i.getValue() ? <span className={i.row.original.overdue ? "font-semibold text-danger" : "text-muted"}>{i.getValue()}</span> : "—"),
+    }),
     h.accessor("assignedToName", { header: "Reviewer", cell: (i) => i.getValue() ?? <span className="text-muted">Unassigned</span> }),
     h.accessor("updatedAt", { header: "Updated", cell: (i) => fmtDateTime(i.getValue()) }),
   ] as AdminColumn<ClaimRow>[];

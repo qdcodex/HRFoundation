@@ -14,6 +14,7 @@ import { AdminUser } from "@/lib/db/models/auth";
 import { Claim, ClaimDocument, CLAIM_STATUS_LABELS } from "@/lib/db/models/claims";
 import { Member, MEMBER_STATUS_LABELS, MembershipPayment } from "@/lib/db/models/membership";
 import { AuditLog } from "@/lib/db/models/system";
+import { claimSla, slaLabel } from "@/lib/domain/claim-sla";
 import { evaluateClaimEligibility } from "@/lib/domain/eligibility";
 import { fmtDate, fmtDateTime, maskMobile } from "@/lib/format";
 import { formatPaise, paiseToRupeesInput } from "@/lib/money";
@@ -23,7 +24,7 @@ import { toIso, todayInIndia } from "@/lib/waiting-period";
 export const instant = false;
 export const metadata = { title: "Claim" };
 
-const VIA: Record<string, string> = { in_person: "In person", post: "Post", email: "Email", phone: "Phone" };
+const VIA: Record<string, string> = { online: "Online (nominee)", in_person: "In person", post: "Post", email: "Email", phone: "Phone" };
 
 export default async function ClaimPage({ params }: PageProps<"/admin/claims/[id]">) {
   const { admin, allowed } = await guardPage("claims:read");
@@ -51,6 +52,7 @@ export default async function ClaimPage({ params }: PageProps<"/admin/claims/[id
   // Live eligibility (re-computed again on the server at decision time).
   const eligibility = member ? evaluateClaimEligibility({ ...member, verifiedPaymentCount }, claim.dateOfDeath, rules) : [];
   const allPassed = eligibility.length > 0 && eligibility.every((c) => c.passed);
+  const sla = claimSla(claim, rules.claimTargetDays);
   const shownChecks = claim.decision?.eligibility?.length ? claim.decision.eligibility : eligibility;
 
   return (
@@ -229,6 +231,10 @@ export default async function ClaimPage({ params }: PageProps<"/admin/claims/[id
                   { label: "Reference", value: <span className="font-mono text-xs">{claim.reference}</span> },
                   { label: "Submitted", value: fmtDateTime(claim.submittedAt) },
                   { label: "Received via", value: VIA[claim.receivedVia] },
+                  {
+                    label: `Target (${rules.claimTargetDays} days)`,
+                    value: sla.kind === "running" ? `${fmtDate(sla.dueOn)} · ${slaLabel(sla)}` : (slaLabel(sla) ?? "—"),
+                  },
                   { label: "Date of death", value: fmtDate(claim.dateOfDeath) },
                   { label: "Requested amount", value: claim.requestedAmountPaise ? formatPaise(claim.requestedAmountPaise) : "—" },
                   { label: "Reviewer", value: claim.assignedToName ?? "Unassigned" },

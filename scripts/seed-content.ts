@@ -74,7 +74,11 @@ async function main() {
 
   const settings = {
     website: websiteSettingsSchema.parse({ phone: site.contact.phone ?? "", email: site.contact.email ?? "", hours: site.contact.hours ?? "" }),
-    membershipRules: membershipRulesSchema.parse({ schemeApproved: membership.schemeApproved }),
+    membershipRules: membershipRulesSchema.parse({
+    schemeApproved: membership.schemeApproved,
+    feePaise: membership.fee ? membership.fee.amountInr * 100 : null,
+    feePeriod: membership.fee?.period ?? "",
+  }),
     notifications: notificationSettingsSchema.parse({}),
   };
   for (const [key, value] of Object.entries(settings)) {

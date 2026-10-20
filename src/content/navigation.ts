@@ -23,7 +23,6 @@ export const buildMainNav = (services: ServiceLink[]): NavItem[] => [
     items: [
       { label: "Activities", href: "/activities", description: "Initiatives approved by the foundation" },
       { label: "News", href: "/news", description: "Announcements and updates" },
-      { label: "Documents", href: "/documents", description: "Registration and public documents" },
     ],
   },
   { kind: "link", label: "Get Involved", href: "/get-involved" },
@@ -37,7 +36,6 @@ export const buildFooterNav = (services: ServiceLink[]): { title: string; links:
       { label: "About us", href: "/about" },
       { label: "Activities", href: "/activities" },
       { label: "News", href: "/news" },
-      { label: "Documents", href: "/documents" },
     ],
   },
   {

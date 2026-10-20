@@ -16,7 +16,6 @@ export const ADMIN_NAV: NavSection[] = [
       { label: "Services", href: "/admin/content/services", icon: "hand-heart", any: ["content:manage"] },
       { label: "Activities & Initiatives", href: "/admin/content/activities", icon: "calendar-days", any: ["content:manage"] },
       { label: "News & Updates", href: "/admin/content/news", icon: "newspaper", any: ["content:manage"] },
-      { label: "Public Documents", href: "/admin/content/documents", icon: "files", any: ["documents:manage", "documents:publish"] },
       { label: "Contact Enquiries", href: "/admin/enquiries", icon: "inbox", any: ["enquiries:read"] },
       { label: "Media Library", href: "/admin/content/media", icon: "image", any: ["content:manage"] },
     ],

@@ -302,7 +302,7 @@ export function WebsiteSettingsForm({ value }: { value: { phone: string; whatsap
 export function MembershipRulesForm({
   value,
 }: {
-  value: { schemeApproved: boolean; registrationOpen: boolean; fee: string; feePeriod: string; waitingPeriodMonths: number; maxBenefit: string; benefitAgeLimit: number; minApplicantAge: number; termsVersion: string; approachingDays: number };
+  value: { schemeApproved: boolean; registrationOpen: boolean; fee: string; feePeriod: string; waitingPeriodMonths: number; maxBenefit: string; benefitAgeLimit: number; minApplicantAge: number; termsVersion: string; approachingDays: number; claimTargetDays: number };
 }) {
   const [approved, setApproved] = useState(value.schemeApproved);
   const { run, pending, fieldErrors: fe } = useAction();
@@ -372,6 +372,9 @@ export function MembershipRulesForm({
           </Field>
           <Field id="approachingDays" label="“Completing soon” window (days)" required error={fe.approachingDays}>
             <Input {...f("approachingDays")} type="number" min={1} max={90} defaultValue={value.approachingDays} />
+          </Field>
+          <Field id="claimTargetDays" label="Claim processing target (days)" required error={fe.claimTargetDays} hint="Shown to nominees on the website and tracked on every open claim.">
+            <Input {...f("claimTargetDays")} type="number" min={1} max={365} defaultValue={value.claimTargetDays} />
           </Field>
         </CardContent>
       </Card>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Mail } from "lucide-react";
 import { buildFooterNav, legalNav } from "@/content/navigation";
 import { getServices } from "@/lib/cms";
 import { publicSettings } from "@/lib/settings";
@@ -7,9 +7,8 @@ import { registration, site } from "@/content/site";
 import { BrandLogo } from "@/components/ui/Brand";
 
 export async function SiteFooter() {
-  const { address } = site;
   const [settings, services] = await Promise.all([publicSettings("website"), getServices()]);
-  const contact = { phone: settings.phone || null, email: settings.email || null };
+  const email = settings.email || site.contact.email;
   const footerNav = buildFooterNav(services);
   const regNo = registration.find((r) => r.label === "Registration number");
   const darpan = registration.find((r) => r.label.startsWith("NGO Darpan"));
@@ -28,38 +27,22 @@ export async function SiteFooter() {
             A charitable trust in Peddapalli, Telangana, working towards education, medical relief and the relief of the poor.
           </p>
 
-          <address className="mt-8 space-y-4 text-sm not-italic text-ivory/85">
-            <p className="flex gap-3">
-              <MapPin aria-hidden className="mt-0.5 size-4 shrink-0 text-gold" />
-              <span>
-                {address.line1}, {address.locality}
-                <br />
-                {address.district}, {address.state} {address.postalCode}
-              </span>
+          <div className="mt-8 space-y-3 text-sm text-ivory/85">
+            <p className="eyebrow text-gold">Official contact</p>
+            <p className="flex items-center gap-3">
+              <Mail aria-hidden className="size-4 shrink-0 text-gold" />
+              <a className="font-medium hover:text-gold transition-colors" href={`mailto:${email}`}>
+                {email}
+              </a>
             </p>
-            <p className="flex gap-3">
-              <Phone aria-hidden className="mt-0.5 size-4 shrink-0 text-gold" />
-              {contact.phone ? (
-                <a className="hover:text-gold" href={`tel:${contact.phone.replace(/\s/g, "")}`}>
-                  {contact.phone}
-                </a>
-              ) : (
-                <span className="text-ivory/60">Public phone number to be announced</span>
-              )}
+            <p className="text-xs text-ivory/60">
+              For enquiries, support, or receipt requests, please write to our official email or use our{" "}
+              <Link href="/contact" className="underline underline-offset-4 hover:text-gold">
+                contact form
+              </Link>
+              .
             </p>
-            <p className="flex gap-3">
-              <Mail aria-hidden className="mt-0.5 size-4 shrink-0 text-gold" />
-              {contact.email ? (
-                <a className="hover:text-gold" href={`mailto:${contact.email}`}>
-                  {contact.email}
-                </a>
-              ) : (
-                <Link className="underline underline-offset-4 hover:text-gold" href="/contact">
-                  Write to us through our contact form
-                </Link>
-              )}
-            </p>
-          </address>
+          </div>
         </div>
 
         <nav aria-label="Footer" className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:col-span-8 lg:pl-12">
@@ -95,11 +78,6 @@ export async function SiteFooter() {
                 </Link>
               </li>
             ))}
-            <li>
-              <Link href="/documents" className="hover:text-ivory">
-                Public documents
-              </Link>
-            </li>
           </ul>
         </div>
       </div>

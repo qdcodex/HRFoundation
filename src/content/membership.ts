@@ -15,8 +15,8 @@ export const membership = {
    */
   registrationMode: "interest" as "interest" | "closed",
 
-  /** CLIENT TO CONFIRM: membership fee and billing period. null shows "To be confirmed". */
-  fee: null as null | { amountInr: number; period: string },
+  /** CLIENT-SPECIFIED: ₹2,000 one-time membership fee. */
+  fee: { amountInr: 2000, period: "one-time" } as null | { amountInr: number; period: string },
 
   /** CLIENT-SPECIFIED */
   waitingPeriodMonths: 6,
@@ -24,7 +24,7 @@ export const membership = {
   maxBenefitInr: 200000,
   /** CLIENT-SPECIFIED: member must be under this age, subject to the approved rules. */
   benefitAgeLimit: 60,
-  /** ASSUMPTION — CLIENT TO CONFIRM: minimum age to apply as a member. */
+  /** CLIENT-SPECIFIED: minimum age to apply as a member. */
   minApplicantAge: 18,
 
   /** CLIENT TO CONFIRM: version/date of the terms shown at /membership/terms. */

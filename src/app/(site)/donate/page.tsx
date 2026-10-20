@@ -1,4 +1,4 @@
-import { BadgeInfo, CreditCard, FileText, MessageSquareText, ReceiptText, ShieldCheck } from "lucide-react";
+import { BadgeInfo, CreditCard, MessageSquareText, ReceiptText, ShieldCheck } from "lucide-react";
 import { CallToAction } from "@/components/sections/CallToAction";
 import { DonationPanel } from "@/components/sections/DonationPanel";
 import { PageHero } from "@/components/sections/PageHero";
@@ -74,7 +74,7 @@ export default async function DonatePage() {
             id="receipts-heading"
             tone="dark"
             index="02"
-            eyebrow="Receipts & documents"
+            eyebrow="Transparency & receipts"
             title="Know what you will receive."
           />
           <div className="mt-12 grid gap-5 md:grid-cols-3">
@@ -82,7 +82,7 @@ export default async function DonatePage() {
               <ReceiptText aria-hidden className="size-7 text-gold" />
               <h3 className="mt-5 font-display text-xl font-bold">Donation receipt</h3>
               <p className="mt-2 leading-relaxed text-ivory/80">
-                Issued to you for your specific donation. Request one through our contact form with your name, amount, date and
+                Issued to you for your specific donation. Request one by writing to us with your name, amount, date and
                 UPI transaction reference.
               </p>
               <TextLink href="/contact" className="mt-5 text-gold hover:text-ivory">
@@ -90,13 +90,13 @@ export default async function DonatePage() {
               </TextLink>
             </div>
             <div className="rounded-2xl bg-forest-soft p-7">
-              <FileText aria-hidden className="size-7 text-gold" />
-              <h3 className="mt-5 font-display text-xl font-bold">Foundation documents</h3>
+              <ShieldCheck aria-hidden className="size-7 text-gold" />
+              <h3 className="mt-5 font-display text-xl font-bold">Accountability & records</h3>
               <p className="mt-2 leading-relaxed text-ivory/80">
-                Registration documents show how the foundation is constituted. They are not a receipt for your donation.
+                Every donation is recorded and checked against the foundation&apos;s bank statement before a receipt is issued.
               </p>
-              <TextLink href="/documents" className="mt-5 text-gold hover:text-ivory">
-                View documents
+              <TextLink href="/about" className="mt-5 text-gold hover:text-ivory">
+                About our trust
               </TextLink>
             </div>
             <div className="rounded-2xl border border-gold/40 p-7">

@@ -1,4 +1,4 @@
-import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MessageSquareCheck, Shield } from "lucide-react";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { PageHero } from "@/components/sections/PageHero";
 import { site } from "@/content/site";
@@ -12,44 +12,8 @@ export function generateMetadata() {
 
 export default async function ContactPage() {
   const page = await getPage("contact");
-  const { address } = site;
   const settings = await publicSettings("website");
-  const contact = { phone: settings.phone || null, email: settings.email || null, hours: settings.hours || null };
-  const mapQuery = encodeURIComponent(`${address.line1}, ${address.locality}, ${address.district}, ${address.state} ${address.postalCode}`);
-
-  const details = [
-    {
-      Icon: MapPin,
-      label: "Registered address",
-      value: (
-        <>
-          {address.line1}, {address.locality}
-          <br />
-          {address.district}, {address.state} {address.postalCode}
-          <br />
-          <a
-            href={`https://www.google.com/maps/search/?api=1&query=${mapQuery}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-2 inline-block text-sm font-semibold text-emerald-ink underline underline-offset-2"
-          >
-            Open in Google Maps<span className="sr-only"> (opens in a new tab)</span>
-          </a>
-        </>
-      ),
-    },
-    {
-      Icon: Phone,
-      label: "Phone",
-      value: contact.phone ? <a href={`tel:${contact.phone.replace(/\s/g, "")}`}>{contact.phone}</a> : <span className="text-muted">To be announced</span>,
-    },
-    {
-      Icon: Mail,
-      label: "Email",
-      value: contact.email ? <a href={`mailto:${contact.email}`}>{contact.email}</a> : <span className="text-muted">To be announced — please use the form</span>,
-    },
-    { Icon: Clock, label: "Office hours", value: contact.hours ?? <span className="text-muted">To be announced</span> },
-  ];
+  const email = settings.email || site.contact.email;
 
   return (
     <>
@@ -64,25 +28,51 @@ export default async function ContactPage() {
         <div className="container-site grid gap-12 lg:grid-cols-12">
           <aside className="lg:col-span-4" aria-labelledby="contact-details-heading">
             <h2 id="contact-details-heading" className="display-md text-forest">
-              Contact details
+              Get in touch
             </h2>
-            <address className="mt-8 space-y-6 not-italic">
-              {details.map(({ Icon, label, value }) => (
-                <div key={label} className="flex gap-4">
-                  <span className="grid size-11 shrink-0 place-items-center rounded-full bg-sage text-forest">
-                    <Icon aria-hidden className="size-5" />
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-muted">{label}</p>
-                    <div className="mt-1 leading-relaxed text-charcoal">{value}</div>
-                  </div>
-                </div>
-              ))}
-            </address>
-            <p className="mt-10 rounded-2xl bg-forest p-6 text-sm leading-relaxed text-ivory/85">
-              For your safety, please do not send bank details, identity numbers or medical records through this form. If we need
-              documents, we will explain how to share them securely.
+            <p className="mt-4 leading-relaxed text-muted">
+              We welcome correspondence regarding our charitable programmes, membership, donations, and community initiatives.
             </p>
+
+            <div className="mt-8 space-y-5">
+              <div className="flex gap-4 rounded-2xl border border-line bg-white p-5 shadow-xs">
+                <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-sage text-forest">
+                  <Mail aria-hidden className="size-6 text-emerald" />
+                </span>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted">Email ID</p>
+                  <a
+                    href={`mailto:${email}`}
+                    className="mt-1 block font-display text-base font-semibold text-forest hover:text-emerald-ink break-all transition-colors"
+                  >
+                    {email}
+                  </a>
+                  <p className="mt-1 text-xs text-muted">Primary contact channel</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4 rounded-2xl border border-line bg-white p-5 shadow-xs">
+                <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-sage text-forest">
+                  <MessageSquareCheck aria-hidden className="size-6 text-emerald" />
+                </span>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted">Web Enquiries</p>
+                  <p className="mt-1 text-sm font-medium text-charcoal">
+                    Send a message anytime using the form on this page.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 rounded-2xl bg-forest p-6 text-sm leading-relaxed text-ivory/85">
+              <div className="flex items-center gap-2 font-semibold text-gold mb-2">
+                <Shield className="size-4 shrink-0" />
+                <span>Privacy & Safety Notice</span>
+              </div>
+              <p>
+                For your safety, please do not send bank account passwords, UPI PINs, or confidential identity documents through web forms or unencrypted channels.
+              </p>
+            </div>
           </aside>
 
           <section className="rounded-[2rem] border border-line bg-white p-6 sm:p-10 lg:col-span-8" aria-labelledby="contact-form-heading">

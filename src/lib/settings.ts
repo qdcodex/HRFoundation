@@ -29,6 +29,8 @@ export const membershipRulesSchema = z.object({
   minApplicantAge: z.number().int().min(0).max(120).default(membershipDefaults.minApplicantAge),
   termsVersion: z.string().trim().min(1).max(80).default(membershipDefaults.termsVersion),
   approachingDays: z.number().int().min(1).max(90).default(30),
+  /** Target number of days from a complete claim to decision and payment (client-specified: 45). */
+  claimTargetDays: z.number().int().min(1).max(365).default(45),
 });
 export type MembershipRules = z.output<typeof membershipRulesSchema>;
 
@@ -40,6 +42,7 @@ export const NOTIFICATION_EVENTS = {
   claim_info_requested: { label: "Additional claim documents requested", to: "claimant", vars: ["name", "reference", "message"] },
   claim_decision: { label: "Claim decision recorded", to: "claimant", vars: ["name", "reference", "outcome"] },
   receipt_issued: { label: "Donation receipt issued", to: "donor", vars: ["name", "receiptNumber", "amount"] },
+  claim_submitted: { label: "New online claim (to foundation inbox)", to: "foundation", vars: ["reference", "membershipId", "name"] },
   enquiry_received: { label: "New website enquiry (to foundation inbox)", to: "foundation", vars: ["reference", "kind", "name", "subject"] },
 } as const;
 export type NotificationEvent = keyof typeof NOTIFICATION_EVENTS;
@@ -86,6 +89,11 @@ export const DEFAULT_TEMPLATES: Record<NotificationEvent, { enabled: boolean; su
     subject: "Your donation receipt {{receiptNumber}}",
     body: "Dear {{name}},\n\nThank you for your donation of {{amount}} to H R Foundation. Your receipt number is {{receiptNumber}}.\n\nH R Foundation",
   },
+  claim_submitted: {
+    enabled: true,
+    subject: "[Website] New death-benefit claim {{reference}}",
+    body: "A nominee has submitted claim {{reference}} for membership {{membershipId}} ({{name}}) with a death certificate.\n\nOpen the admin dashboard to review it.",
+  },
   enquiry_received: {
     enabled: true,
     subject: "[Website] {{kind}} enquiry {{reference}}",
@@ -101,7 +109,11 @@ const defaults = {
     email: site.contact.email ?? "",
     hours: site.contact.hours ?? "",
   }),
-  membershipRules: membershipRulesSchema.parse({ schemeApproved: membershipDefaults.schemeApproved }),
+  membershipRules: membershipRulesSchema.parse({
+    schemeApproved: membershipDefaults.schemeApproved,
+    feePaise: membershipDefaults.fee ? membershipDefaults.fee.amountInr * 100 : null,
+    feePeriod: membershipDefaults.fee?.period ?? "",
+  }),
   notifications: notificationSettingsSchema.parse({}),
 };
 

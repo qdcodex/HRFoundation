@@ -19,7 +19,6 @@ const subjects = [
   { value: "medical", label: "Medical relief" },
   { value: "membership", label: "Membership" },
   { value: "donation", label: "Donation or receipt" },
-  { value: "documents", label: "Request a document" },
   { value: "other", label: "Something else" },
 ];
 

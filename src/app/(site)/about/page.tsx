@@ -136,7 +136,7 @@ export default async function AboutPage() {
               <strong>Trustee profiles:</strong> names, roles and short profiles of the trustees will be published here once the
               foundation approves them for public display.
             </PendingNote>
-            <TextLink href="/documents">Public documents</TextLink>
+            <TextLink href="/contact">Connect with us</TextLink>
           </div>
         </div>
       </section>

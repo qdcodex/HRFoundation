@@ -75,16 +75,6 @@ export const PAGE_DEFAULTS: PageDefaults[] = [
     seoDescription: "News and announcements from H R Foundation, a charitable trust in Peddapalli, Telangana.",
   },
   {
-    key: "documents",
-    path: "/documents",
-    label: "Documents",
-    title: "Public documents.",
-    intro:
-      "Registration details and documents that the foundation has approved for sharing. Copies of documents marked “available on request” can be requested through our contact page.",
-    seoTitle: "Public Documents",
-    seoDescription: "Registration details and public documents of H R Foundation, Telangana, including trust registration and NGO Darpan details.",
-  },
-  {
     key: "donate",
     path: "/donate",
     label: "Donate",
@@ -130,9 +120,9 @@ export const PAGE_DEFAULTS: PageDefaults[] = [
     path: "/contact",
     label: "Contact",
     title: "We would be glad to hear from you.",
-    intro: "Ask a question, request a document or a donation receipt, or tell us about a need in your community.",
+    intro: "Ask a question, request a donation receipt, or tell us about a need in your community.",
     seoTitle: "Contact Us",
-    seoDescription: "Contact H R Foundation, Peddapalli, Telangana. Send an enquiry about our work, donations, membership or documents.",
+    seoDescription: "Contact H R Foundation, Peddapalli, Telangana. Reach us directly by email or through our online enquiry form.",
   },
   {
     key: "privacy-policy",
@@ -144,7 +134,7 @@ export const PAGE_DEFAULTS: PageDefaults[] = [
     seoDescription: "How H R Foundation collects, uses and protects personal information shared through its website.",
     body: `## Who we are
 
-This website is operated by ${site.name}, a trust registered at ${a.line1}, ${a.locality}, ${a.district}, ${a.state} ${a.postalCode}, India.
+This website is operated by ${site.name}, a charitable trust registered in ${a.district} district, ${a.state}, India. You can reach us at ${site.contact.email}.
 
 ## Information we collect
 

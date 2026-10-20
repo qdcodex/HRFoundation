@@ -9,6 +9,7 @@ import { escapeRegex, flatParams, istDayBoundary, parseList } from "@/lib/admin/
 import { guardPage } from "@/lib/auth/dal";
 import { connectDb } from "@/lib/db/connect";
 import { Claim, CLAIM_STATUS_LABELS, CLAIM_STATUSES } from "@/lib/db/models/claims";
+import { claimSla, slaLabel } from "@/lib/domain/claim-sla";
 import { loadSettings } from "@/lib/settings";
 
 export const instant = false;
@@ -36,7 +37,7 @@ export default async function ClaimsPage({ searchParams }: PageProps<"/admin/cla
   }
 
   const [docs, total] = await Promise.all([
-    Claim.find(filter).sort({ [list.sort]: list.dir, _id: -1 }).skip(list.skip).limit(list.pageSize).select("-verificationNotes -infoRequests -decision.eligibility").lean(),
+    Claim.find(filter).sort({ [list.sort]: list.dir, _id: -1 }).skip(list.skip).limit(list.pageSize).select("-verificationNotes -infoRequests.message -infoRequests.resolutionNote -decision.eligibility").lean(),
     Claim.countDocuments(filter),
   ]);
   const showClaimant = admin.permissions.includes("nominees:read") || admin.permissions.includes("claims:review");
@@ -53,13 +54,15 @@ export default async function ClaimsPage({ searchParams }: PageProps<"/admin/cla
     assignedToName: c.assignedToName ?? null,
     updatedAt: c.updatedAt.toISOString(),
     dateOfDeath: c.dateOfDeath,
+    sla: slaLabel(claimSla(c, rules.claimTargetDays)),
+    overdue: (() => { const x = claimSla(c, rules.claimTargetDays); return x.kind === "running" && x.daysLeft < 0; })(),
   }));
 
   return (
     <>
       <PageHeader
         title="Death-benefit claims"
-        description="Claims are recorded by staff when a nominee comes forward. Every decision needs an authorised reviewer and is kept in the audit log."
+        description={`Claims are submitted online by nominees or recorded by staff. Target: ${rules.claimTargetDays} days from complete documents to payment. Every decision needs an authorised reviewer and is kept in the audit log.`}
         crumbs={[{ label: "Membership", href: "/admin/membership" }, { label: "Claims" }]}
         actions={
           admin.permissions.includes("claims:review") && (

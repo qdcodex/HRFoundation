@@ -36,6 +36,7 @@ export default async function MembershipRulesPage() {
             minApplicantAge: r.minApplicantAge,
             termsVersion: r.termsVersion,
             approachingDays: r.approachingDays,
+            claimTargetDays: r.claimTargetDays,
           }}
         />
       </div>

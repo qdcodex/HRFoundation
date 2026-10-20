@@ -18,15 +18,11 @@ const organisationJsonLd = {
   areaServed: { "@type": "State", name: "Telangana" },
   address: {
     "@type": "PostalAddress",
-    streetAddress: `${site.address.line1}, ${site.address.locality}`,
-    addressLocality: site.address.district,
     addressRegion: site.address.state,
-    postalCode: site.address.postalCode,
     addressCountry: "IN",
   },
   knowsAbout: registeredObjects.slice(0, 3),
-  ...(site.contact.email ? { email: site.contact.email } : {}),
-  ...(site.contact.phone ? { telephone: site.contact.phone } : {}),
+  email: site.contact.email,
 };
 
 export default async function SiteLayout({ children }: LayoutProps<"/">) {

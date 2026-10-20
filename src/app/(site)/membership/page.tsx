@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FileWarning } from "lucide-react";
+import { ClaimForm } from "@/components/forms/ClaimForm";
 import { MembershipRegistrationForm } from "@/components/forms/MembershipRegistrationForm";
 import { MembershipStatus } from "@/components/forms/MembershipStatus";
 import { MembershipConditions } from "@/components/sections/MembershipConditions";
@@ -85,8 +86,7 @@ export default async function MembershipPage() {
             <h3 className="mb-6 font-display text-xl font-bold text-forest">Proposed eligibility for death-benefit consideration</h3>
             <MembershipConditions rules={rules} />
             <PendingNote className="mt-6">
-              The membership fee, any other eligibility requirements, exclusions and the claim process will be confirmed in the
-              approved terms.
+              Any other eligibility requirements and exclusions will be confirmed in the approved terms.
             </PendingNote>
           </div>
         </div>
@@ -145,18 +145,25 @@ export default async function MembershipPage() {
         </div>
       </section>
 
-      <section className="bg-forest py-16 text-ivory sm:py-20" aria-labelledby="claims-heading">
+      <section id="claim" className="scroll-mt-24 bg-forest py-16 text-ivory sm:py-20" aria-labelledby="claims-heading">
         <div className="container-site grid gap-10 lg:grid-cols-12">
           <div className="lg:col-span-5">
-            <SectionHeading id="claims-heading" tone="dark" index="04" eyebrow="Claims" title="How claims will be handled." />
+            <SectionHeading
+              id="claims-heading"
+              tone="dark"
+              index="04"
+              eyebrow="Claims"
+              title="How a claim is made."
+              intro={`We aim to complete each claim within ${m.claimTargetDays} days of receiving complete documents.`}
+            />
           </div>
           <div className="lg:col-span-7">
             <ol className="space-y-5">
               {[
-                "The nominee informs the foundation and receives a claim reference.",
-                "The nominee submits the required documents through a secure channel provided by the foundation — never through public forms or email attachments unless instructed.",
-                "The foundation verifies membership status, the waiting period, the age condition and the documents.",
-                "A decision is recorded and the nominee is informed. Any approved payment and its status are recorded.",
+                "The nominee submits the claim online with the membership ID, the nominee's registered mobile number and a copy of the death certificate, and receives a claim reference.",
+                "The foundation verifies the death certificate, the membership status, the waiting period and the age condition.",
+                "The foundation contacts the nominee to confirm their bank account details. Bank details are never collected through this website.",
+                `After verification, the approved amount is transferred to the nominee's bank account — within ${m.claimTargetDays} days of receiving complete documents.`,
               ].map((step, i) => (
                 <li key={step} className="flex gap-5">
                   <span className="font-display text-sm font-bold text-gold tabular-nums">{String(i + 1).padStart(2, "0")}</span>
@@ -165,9 +172,36 @@ export default async function MembershipPage() {
               ))}
             </ol>
             <p className="mt-8 text-sm leading-relaxed text-ivory/65">
-              The claim process will open only after the scheme is approved. Nominee details and supporting documents are kept
-              private and are never published.
+              If more documents are needed, the time is counted from when they are received. The death certificate and nominee
+              details are kept private and are never published.
             </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="submit-claim" className="scroll-mt-24 bg-ivory py-16 sm:py-24" aria-labelledby="submit-claim-heading">
+        <div className="container-site grid gap-12 lg:grid-cols-12">
+          <div className="lg:col-span-4">
+            <SectionHeading
+              id="submit-claim-heading"
+              index="05"
+              eyebrow="For nominees"
+              title="Submit a claim."
+              intro="We are sorry for your loss. Please fill in this short form and attach the death certificate. We will contact you on the nominee's mobile number."
+            />
+          </div>
+          <div className="lg:col-span-8">
+            {m.schemeApproved ? (
+              <ClaimForm targetDays={m.claimTargetDays} />
+            ) : (
+              <PendingNote>
+                The online claim form opens once the membership scheme is formally approved. Until then, please{" "}
+                <Link href="/contact" className="text-emerald-ink underline underline-offset-2">
+                  contact the foundation
+                </Link>
+                .
+              </PendingNote>
+            )}
           </div>
         </div>
       </section>
@@ -177,7 +211,7 @@ export default async function MembershipPage() {
           <div className="lg:col-span-4">
             <SectionHeading
               id="faq-heading"
-              index="05"
+              index="06"
               eyebrow="Questions"
               title="Before you join."
               intro="Straight answers to the questions people ask most. If anything is unclear, contact us before you apply."
@@ -195,7 +229,7 @@ export default async function MembershipPage() {
             <div className="lg:sticky lg:top-28">
               <SectionHeading
                 id="register-heading"
-                index="06"
+                index="07"
                 eyebrow="Registration"
                 title="Apply for membership."
                 intro={

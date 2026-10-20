@@ -40,7 +40,7 @@ export interface IClaim {
   memberName: string;
   claimant: { name: string; relationship: string; mobile: string; email?: string | null; isNominee: boolean };
   dateOfDeath: string;
-  receivedVia: "in_person" | "post" | "email" | "phone";
+  receivedVia: "online" | "in_person" | "post" | "email" | "phone";
   submittedAt: Date;
   requestedAmountPaise?: number | null;
   status: ClaimStatus;
@@ -61,7 +61,8 @@ export interface IClaim {
   } | null;
   payment?: { reference: string; paidOn: string; method: string; amountPaise: number; recordedBy: Types.ObjectId; recordedByName: string; at: Date } | null;
   closedReason?: string | null;
-  createdBy: Types.ObjectId;
+  /** Null when the nominee submitted the claim online. */
+  createdBy?: Types.ObjectId | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -80,7 +81,7 @@ const ClaimSchema = new Schema<IClaim>(
       isNominee: { type: Boolean, default: true },
     },
     dateOfDeath: { type: String, required: true, match: /^\d{4}-\d{2}-\d{2}$/ },
-    receivedVia: { type: String, enum: ["in_person", "post", "email", "phone"], required: true },
+    receivedVia: { type: String, enum: ["online", "in_person", "post", "email", "phone"], required: true },
     submittedAt: { type: Date, required: true, index: true },
     requestedAmountPaise: { type: Number, default: null },
     status: { type: String, enum: CLAIM_STATUSES, required: true, index: true },
@@ -122,7 +123,7 @@ const ClaimSchema = new Schema<IClaim>(
       default: null,
     },
     closedReason: { type: String, default: null },
-    createdBy: { type: Schema.Types.ObjectId, ref: "AdminUser", required: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: "AdminUser", default: null },
   },
   { timestamps: true },
 );
@@ -142,7 +143,8 @@ export interface IClaimDocument {
   mime: string;
   size: number;
   sha256: string;
-  uploadedBy: Types.ObjectId;
+  /** Null when uploaded by the nominee through the website. */
+  uploadedBy?: Types.ObjectId | null;
   uploadedByName: string;
   createdAt: Date;
 }
@@ -155,7 +157,7 @@ const ClaimDocumentSchema = new Schema<IClaimDocument>(
     mime: { type: String, required: true },
     size: { type: Number, required: true },
     sha256: { type: String, required: true },
-    uploadedBy: { type: Schema.Types.ObjectId, ref: "AdminUser", required: true },
+    uploadedBy: { type: Schema.Types.ObjectId, ref: "AdminUser", default: null },
     uploadedByName: { type: String, required: true },
   },
   { timestamps: { createdAt: true, updatedAt: false } },

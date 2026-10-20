@@ -10,6 +10,7 @@ export type MembershipView = {
   benefitAgeLimit: number;
   minApplicantAge: number;
   termsVersion: string;
+  claimTargetDays: number;
 };
 
 export function toMembershipView(r: {
@@ -22,6 +23,7 @@ export function toMembershipView(r: {
   benefitAgeLimit: number;
   minApplicantAge: number;
   termsVersion: string;
+  claimTargetDays: number;
 }): MembershipView {
   return {
     schemeApproved: r.schemeApproved,
@@ -32,5 +34,6 @@ export function toMembershipView(r: {
     benefitAgeLimit: r.benefitAgeLimit,
     minApplicantAge: r.minApplicantAge,
     termsVersion: r.termsVersion,
+    claimTargetDays: r.claimTargetDays,
   };
 }

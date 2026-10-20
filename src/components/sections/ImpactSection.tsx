@@ -25,8 +25,8 @@ export function ImpactSection({ stats = [] }: { stats?: VerifiedStat[] }) {
     },
     {
       Icon: FileCheck2,
-      title: "Keep documents open",
-      text: "Registration and other approved documents are listed on our documents page, so supporters can see how we are constituted.",
+      title: "Open governance",
+      text: "The trust is registered in Peddapalli, Telangana. Its registration number and NGO Darpan ID are shown on this website so anyone can check them.",
     },
     {
       Icon: Scale,
@@ -86,8 +86,8 @@ export function ImpactSection({ stats = [] }: { stats?: VerifiedStat[] }) {
             <Reveal className="rounded-2xl bg-forest p-6 text-ivory sm:p-8 lg:col-span-5" delay={0.1}>
               <p className="eyebrow text-gold">Registration at a glance</p>
               <RegistrationFacts tone="dark" className="mt-4" />
-              <TextLink href="/documents" className="mt-6 text-gold hover:text-ivory">
-                View public documents
+              <TextLink href="/about" className="mt-6 text-gold hover:text-ivory">
+                About our governance
               </TextLink>
             </Reveal>
           </div>

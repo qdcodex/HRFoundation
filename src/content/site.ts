@@ -29,14 +29,14 @@ export const site = {
   },
 
   /**
-   * CLIENT TO CONFIRM: official public phone, email and office hours.
-   * Leave as null until approved — the site will show a "to be confirmed" note.
-   * (Personal numbers/emails found in internal documents are intentionally NOT used.)
+   * Public contact details:
+   * Only the official email address is displayed publicly.
+   * Office address and mobile numbers are omitted from public display.
    */
   contact: {
+    email: "contact@hrfoundationindia.org" as string,
     phone: null as string | null,
     whatsapp: null as string | null,
-    email: null as string | null,
     hours: null as string | null,
   },
 

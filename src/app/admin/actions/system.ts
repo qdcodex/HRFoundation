@@ -160,6 +160,7 @@ const rulesInput = z.object({
   minApplicantAge: z.coerce.number().int().min(0).max(120),
   termsVersion: z.string().trim().min(1).max(80),
   approachingDays: z.coerce.number().int().min(1).max(90),
+  claimTargetDays: z.coerce.number().int().min(1).max(365),
   confirmApproval: z.boolean().default(false),
 });
 

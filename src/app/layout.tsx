@@ -22,6 +22,8 @@ export const metadata: Metadata = {
   },
   twitter: { card: "summary_large_image", title: site.name, description: site.description },
   formatDetection: { telephone: false },
+  // Google Search Console "HTML tag" verification (optional; DNS verification needs no code).
+  verification: process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : undefined,
 };
 
 export const viewport: Viewport = {

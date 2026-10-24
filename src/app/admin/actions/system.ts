@@ -184,7 +184,7 @@ export async function saveMembershipRules(input: unknown) {
 
 export async function saveNotificationSettings(input: unknown) {
   const tpl = z.object({ enabled: z.boolean(), subject: z.string().trim().min(3).max(160), body: z.string().trim().min(10).max(4000) });
-  const schema = z.object({ templates: z.record(z.enum(Object.keys(NOTIFICATION_EVENTS) as [string, ...string[]]), tpl) });
+  const schema = z.object({ templates: z.record(z.enum(Object.keys(NOTIFICATION_EVENTS) as [string, ...string[]]), tpl), adminCopy: z.boolean().default(true) });
   return runAction("settings:manage", schema, input, async (d, admin) => {
     const value = notificationSettingsSchema.parse(d);
     await saveSetting("notifications", value, admin, "notification templates");

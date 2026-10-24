@@ -388,20 +388,34 @@ export function MembershipRulesForm({
 export function NotificationTemplatesForm({
   events,
   templates,
+  adminCopy: initialAdminCopy,
 }: {
   events: { key: string; label: string; to: string; vars: string[] }[];
   templates: Record<string, { enabled: boolean; subject: string; body: string }>;
+  adminCopy: boolean;
 }) {
   const [state, setState] = useState(templates);
+  const [adminCopy, setAdminCopy] = useState(initialAdminCopy);
   const { run, pending, fieldErrors } = useAction();
   return (
     <form
       className="space-y-4"
       onSubmit={(e) => {
         e.preventDefault();
-        void run(saveNotificationSettings, { templates: state });
+        void run(saveNotificationSettings, { templates: state, adminCopy });
       }}
     >
+      <Card>
+        <CardContent className="pt-6">
+          <label className="flex items-start gap-2 text-sm">
+            <Checkbox checked={adminCopy} onChange={(e) => setAdminCopy(e.target.checked)} />
+            <span>
+              <strong>Copy to admin</strong> — send the admin inbox a copy of every email to members, donors and claimants (private values such as
+              temporary passwords are left out of the copy).
+            </span>
+          </label>
+        </CardContent>
+      </Card>
       {events.map((ev) => {
         const t = state[ev.key];
         const upd = (patch: Partial<typeof t>) => setState((s) => ({ ...s, [ev.key]: { ...s[ev.key], ...patch } }));

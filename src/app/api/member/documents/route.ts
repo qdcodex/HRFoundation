@@ -4,9 +4,8 @@ import { audit } from "@/lib/audit";
 import { Claim, ClaimDocument } from "@/lib/db/models/claims";
 import { CLAIM_DOCUMENT_KINDS, CLAIM_OPEN_FOR_UPLOAD, CLAIM_UPLOAD } from "@/lib/domain/online-claim";
 import { getMember } from "@/lib/member-auth/session";
-import { notify } from "@/lib/notifications";
+import { adminInbox, notify } from "@/lib/notifications";
 import { json, rateLimit, unavailable } from "@/lib/server/submissions";
-import { loadSettings } from "@/lib/settings";
 import { putFile, UploadError, validateUpload } from "@/lib/storage";
 
 const schema = z.object({
@@ -57,7 +56,7 @@ export async function POST(request: Request) {
       { id: null, name: `Member portal (${member.membershipId})` },
       { action: "claims.document_uploaded_online", entityType: "Claim", entityId: claim._id.toString(), summary: `Family uploaded "${parsed.data.kind}" for claim ${claim.reference}.` },
     );
-    const inbox = (await loadSettings("website")).enquiryInbox || process.env.FORM_TO_EMAIL;
+    const inbox = await adminInbox();
     await notify("claim_document_uploaded", inbox, { reference: claim.reference, membershipId: claim.membershipId, kind: parsed.data.kind }, { entity: "Claim", id: claim._id.toString() });
     return json({ ok: true, reference: claim.reference });
   } catch (error) {

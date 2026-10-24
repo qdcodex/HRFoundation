@@ -3,9 +3,8 @@ import { audit } from "@/lib/audit";
 import { isDuplicateKey } from "@/lib/actions";
 import { Claim, ClaimDocument, type ClaimStatus } from "@/lib/db/models/claims";
 import type { IMember, INominee } from "@/lib/db/models/membership";
-import { notify } from "@/lib/notifications";
+import { adminInbox, notify } from "@/lib/notifications";
 import { createReference } from "@/lib/server/submissions";
-import { loadSettings } from "@/lib/settings";
 import { deleteFile, putFile, type validateUpload } from "@/lib/storage";
 
 export type CheckedUpload = Awaited<ReturnType<typeof validateUpload>>;
@@ -73,7 +72,7 @@ export async function fileOnlineClaim(opts: {
     { id: null, name: opts.channel === "member portal" ? `Member portal (${member.membershipId})` : "Public website (nominee)" },
     { action: "claims.submitted_online", entityType: "Claim", entityId: claim.id, summary: `Nominee submitted claim ${claim.reference} for ${member.membershipId} via the ${opts.channel}, with a death certificate.` },
   );
-  const inbox = (await loadSettings("website")).enquiryInbox || process.env.FORM_TO_EMAIL;
+  const inbox = await adminInbox();
   await notify("claim_submitted", inbox, { reference: claim.reference, membershipId: member.membershipId ?? "", name: member.fullName }, { entity: "Claim", id: claim.id });
   return { ok: true, reference: claim.reference, id: claim.id };
 }

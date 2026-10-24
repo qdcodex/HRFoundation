@@ -6,15 +6,15 @@ import { loadCertificateLogo, renderMembershipCertificate } from "@/lib/membersh
 import { loadSettings } from "@/lib/settings";
 import { toIso, todayInIndia } from "@/lib/waiting-period";
 
-/** Builds the certificate PDF response for an active or suspended member, or null when none can be issued. */
-export async function certificateResponse(memberId: Types.ObjectId | string, requestUrl: string) {
+/** Certificate PDF bytes for an active or suspended member, or null when none can be issued. */
+export async function certificatePdf(memberId: Types.ObjectId | string, baseUrl: string) {
   await connectDb();
   const member = await Member.findById(memberId).lean();
   if (!member?.membershipId || !member.effectiveDate || !["active", "suspended"].includes(member.status)) return null;
   const [nominee, rules, logoPng] = await Promise.all([
     Nominee.findOne({ memberId: member._id }).lean(),
     loadSettings("membershipRules"),
-    loadCertificateLogo(requestUrl),
+    loadCertificateLogo(baseUrl),
   ]);
   const bytes = await renderMembershipCertificate({
     member: { fullName: member.fullName, membershipId: member.membershipId, effectiveDate: member.effectiveDate, status: member.status },
@@ -23,12 +23,19 @@ export async function certificateResponse(memberId: Types.ObjectId | string, req
     issuedOn: toIso(todayInIndia()),
     logoPng,
   });
+  return { membershipId: member.membershipId, filename: `${member.membershipId}-certificate.pdf`, bytes };
+}
+
+/** The certificate as an inline PDF response. */
+export async function certificateResponse(memberId: Types.ObjectId | string, requestUrl: string) {
+  const cert = await certificatePdf(memberId, requestUrl);
+  if (!cert) return null;
   return {
-    membershipId: member.membershipId,
-    response: new Response(new Uint8Array(bytes), {
+    membershipId: cert.membershipId,
+    response: new Response(new Uint8Array(cert.bytes), {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="${member.membershipId}-certificate.pdf"`,
+        "Content-Disposition": `inline; filename="${cert.filename}"`,
         "Cache-Control": "private, no-store",
         "X-Content-Type-Options": "nosniff",
       },

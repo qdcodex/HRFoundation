@@ -451,7 +451,7 @@ You will be asked to choose your own password at first sign-in.`;
       <DialogContent>
         <DialogHeader
           title="Member login details"
-          description={`Give these to ${details.name} in person or by message. The password is shown only now — it is not stored or emailed. The member must choose a new password at first sign-in.`}
+          description={`These have also been emailed to ${details.name} if an email address is on record. Otherwise give them in person or by message. The password is shown only now and is never stored; the member must choose a new one at first sign-in.`}
         />
         <dl className="grid gap-3 rounded-lg border border-line bg-white p-4 text-sm">
           <div>

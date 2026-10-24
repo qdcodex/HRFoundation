@@ -1,8 +1,7 @@
 import { connectDb, isDatabaseConfigured } from "@/lib/db/connect";
 import { Enquiry } from "@/lib/db/models/system";
-import { notify } from "@/lib/notifications";
+import { adminInbox, notify } from "@/lib/notifications";
 import { createReference, json, rateLimit, readJson, unavailable } from "@/lib/server/submissions";
-import { loadSettings } from "@/lib/settings";
 import { fieldErrors, involvementSchema } from "@/lib/validation";
 
 const types: Record<string, string> = { volunteer: "Volunteering", partnership: "Partnership", other: "Other support" };
@@ -31,7 +30,7 @@ export async function POST(request: Request) {
       city: d.city,
       interests: d.interests,
     });
-    const inbox = (await loadSettings("website")).enquiryInbox || process.env.FORM_TO_EMAIL;
+    const inbox = await adminInbox();
     await notify("enquiry_received", inbox, { reference: enquiry.reference, kind: types[d.type], name: d.name, subject: enquiry.subject }, { entity: "Enquiry", id: enquiry.id });
     return json({ ok: true, reference: enquiry.reference, delivered: true });
   } catch (error) {

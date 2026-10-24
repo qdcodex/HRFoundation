@@ -3,12 +3,14 @@
 import { Types } from "mongoose";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { siteUrl } from "@/content/site";
 import { ActionError, runAction } from "@/lib/actions";
 import { audit } from "@/lib/audit";
 import { connectDb } from "@/lib/db/connect";
 import { nextSequence } from "@/lib/db/models/finance";
 import { Member, MembershipPayment, Nominee, NOMINEE_RELATIONSHIPS, PAYMENT_METHODS } from "@/lib/db/models/membership";
 import { reserveTxnRef, releaseTxnRef } from "@/lib/domain/txn";
+import { certificatePdf } from "@/lib/member-auth/certificate";
 import { issueTemporaryPassword } from "@/lib/member-auth/credentials";
 import { canSignIn } from "@/lib/member-auth/session";
 import { formatPaise, parseRupeesToPaise } from "@/lib/money";
@@ -231,14 +233,17 @@ export async function decideApplication(input: unknown) {
       summary: `Activated ${member.applicationRef} as ${membershipId}, effective ${d.effectiveDate}.`,
       details: { membershipId, effectiveDate: d.effectiveDate, waitingEnds: toIso(waitingEnds) },
     });
+    const password = await issueTemporaryPassword(activated._id);
+    await audit(admin, { action: "member_portal.login_issued", entityType: "Member", entityId: d.memberId, summary: `Issued member portal login for ${membershipId}.` });
+    const cert = await certificatePdf(activated._id, siteUrl).catch(() => null);
     await notify(
       "membership_activated",
       activated.email,
       { name: activated.fullName, membershipId, effectiveDate: formatLong(eff), waitingEnds: formatLong(waitingEnds) },
       { entity: "Member", id: d.memberId },
+      { attachments: cert ? [{ filename: cert.filename, content: cert.bytes, contentType: "application/pdf" }] : undefined },
     );
-    const password = await issueTemporaryPassword(activated._id);
-    await audit(admin, { action: "member_portal.login_issued", entityType: "Member", entityId: d.memberId, summary: `Issued member portal login for ${membershipId}.` });
+    await sendLoginEmail(activated, membershipId, password, d.memberId);
     refresh(d.memberId);
     return { ok: true, message: `Membership activated: ${membershipId}.`, data: { membershipId, name: activated.fullName, password } };
   });
@@ -247,6 +252,17 @@ export async function decideApplication(input: unknown) {
 /* ---------------- Member portal login ---------------- */
 
 const memberIdOnly = z.object({ memberId: objectId });
+
+/** Emails the login details to the member; the admin copy and the stored log omit the password. */
+function sendLoginEmail(member: { fullName: string; email?: string | null }, membershipId: string, password: string, memberId: string) {
+  return notify(
+    "member_login_issued",
+    member.email,
+    { name: member.fullName, membershipId, password, loginUrl: `${siteUrl}/member/login` },
+    { entity: "Member", id: memberId },
+    { privateVars: ["password"] },
+  );
+}
 
 export async function issueMemberLogin(input: unknown) {
   return runAction<typeof memberIdOnly, LoginDetails>("membership:manage", memberIdOnly, input, async (d, admin) => {
@@ -260,6 +276,7 @@ export async function issueMemberLogin(input: unknown) {
       entityId: d.memberId,
       summary: `${member.portal?.issuedAt ? "Reset" : "Issued"} member portal login for ${member.membershipId}.`,
     });
+    await sendLoginEmail(member, member.membershipId, password, d.memberId);
     refresh(d.memberId);
     return { ok: true, message: "New login details created.", data: { membershipId: member.membershipId, name: member.fullName, password } };
   });

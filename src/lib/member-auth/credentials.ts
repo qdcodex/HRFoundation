@@ -6,8 +6,8 @@ import { destroyAllMemberSessions } from "./session";
 
 /**
  * Sets a new one-time portal password for a member and signs out all their sessions.
- * The plain password is returned ONLY so staff can hand it to the member once; it is never stored,
- * logged or emailed (notification bodies are kept in the database).
+ * The plain password is returned only so it can be shown to staff once and emailed to the member.
+ * It is never stored: the notification log and the admin copy of the email have it masked.
  */
 export async function issueTemporaryPassword(memberId: Types.ObjectId | string) {
   const password = generateMemberTemporaryPassword();

@@ -37,7 +37,8 @@ export type MembershipRules = z.output<typeof membershipRulesSchema>;
 export const NOTIFICATION_EVENTS = {
   application_received: { label: "Membership application received", to: "applicant", vars: ["name", "reference"] },
   payment_verified: { label: "Membership payment verified", to: "member", vars: ["name", "reference", "amount"] },
-  membership_activated: { label: "Membership activated", to: "member", vars: ["name", "membershipId", "effectiveDate", "waitingEnds"] },
+  membership_activated: { label: "Membership activated (certificate attached)", to: "member", vars: ["name", "membershipId", "effectiveDate", "waitingEnds"] },
+  member_login_issued: { label: "Member portal login details", to: "member", vars: ["name", "membershipId", "password", "loginUrl"] },
   waiting_period_completed: { label: "Waiting period completed", to: "member", vars: ["name", "membershipId", "completedOn"] },
   claim_info_requested: { label: "Additional claim documents requested", to: "claimant", vars: ["name", "reference", "message"] },
   claim_decision: { label: "Claim decision recorded", to: "claimant", vars: ["name", "reference", "outcome"] },
@@ -51,6 +52,8 @@ export type NotificationEvent = keyof typeof NOTIFICATION_EVENTS;
 const templateSchema = z.object({ enabled: z.boolean(), subject: z.string().max(160), body: z.string().max(4000) });
 export const notificationSettingsSchema = z.object({
   templates: z.record(z.string(), templateSchema).default({}),
+  /** Send the foundation a copy of every email to members, donors and claimants. */
+  adminCopy: z.boolean().default(true),
 });
 export type NotificationSettings = z.output<typeof notificationSettingsSchema>;
 
@@ -68,7 +71,12 @@ export const DEFAULT_TEMPLATES: Record<NotificationEvent, { enabled: boolean; su
   membership_activated: {
     enabled: true,
     subject: "Your H R Foundation membership is active ({{membershipId}})",
-    body: "Dear {{name}},\n\nYour membership is now active. Membership ID: {{membershipId}}. Effective date: {{effectiveDate}}. The waiting period ends on {{waitingEnds}}.\n\nCompleting the waiting period does not by itself guarantee any payment; all approved terms apply.\n\nH R Foundation",
+    body: "Dear {{name}},\n\nYour membership is now active. Membership ID: {{membershipId}}. Effective date: {{effectiveDate}}. The waiting period ends on {{waitingEnds}}.\n\nYour membership certificate is attached. You can download it again at any time from the member portal.\n\nCompleting the waiting period does not by itself guarantee any payment; all approved terms apply.\n\nH R Foundation",
+  },
+  member_login_issued: {
+    enabled: true,
+    subject: "Your H R Foundation member login ({{membershipId}})",
+    body: "Dear {{name}},\n\nHere are your login details for the H R Foundation member portal:\n\nSign-in page: {{loginUrl}}\nMembership ID: {{membershipId}}\nTemporary password: {{password}}\n\nYou will be asked to choose your own password when you first sign in. In the portal you can download your membership certificate and, if ever needed, your family can submit a claim with the death certificate.\n\nPlease keep these details safe and share them only with your nominee.\n\nH R Foundation",
   },
   waiting_period_completed: {
     enabled: false,

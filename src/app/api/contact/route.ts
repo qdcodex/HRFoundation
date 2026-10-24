@@ -1,8 +1,7 @@
 import { connectDb, isDatabaseConfigured } from "@/lib/db/connect";
 import { Enquiry } from "@/lib/db/models/system";
-import { notify } from "@/lib/notifications";
+import { adminInbox, notify } from "@/lib/notifications";
 import { createReference, json, rateLimit, readJson, unavailable } from "@/lib/server/submissions";
-import { loadSettings } from "@/lib/settings";
 import { contactSchema, fieldErrors } from "@/lib/validation";
 
 const subjects: Record<string, string> = {
@@ -36,7 +35,7 @@ export async function POST(request: Request) {
       subject: subjects[d.subject],
       message: d.message,
     });
-    const inbox = (await loadSettings("website")).enquiryInbox || process.env.FORM_TO_EMAIL;
+    const inbox = await adminInbox();
     await notify("enquiry_received", inbox, { reference: enquiry.reference, kind: "Contact", name: d.name, subject: subjects[d.subject] }, { entity: "Enquiry", id: enquiry.id });
     return json({ ok: true, reference: enquiry.reference, delivered: true });
   } catch (error) {

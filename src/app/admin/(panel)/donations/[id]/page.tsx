@@ -78,7 +78,7 @@ export default async function DonationDetailPage({ params }: PageProps<"/admin/d
                   { label: "Transaction ref", value: <span className="font-mono">{d.transactionRef ?? "—"}</span> },
                   { label: "Source", value: d.source === "manual" ? "Recorded by staff" : "Online gateway" },
                   { label: "Purpose", value: d.purpose ?? "—" },
-                  { label: "Recorded by", value: `${names.get(d.recordedBy.toString()) ?? "—"}, ${fmtDateTime(d.createdAt)}` },
+                  { label: "Recorded by", value: `${d.recordedBy ? (names.get(d.recordedBy.toString()) ?? "—") : "Online payment (Razorpay)"}, ${fmtDateTime(d.createdAt)}` },
                   { label: "Verified", value: d.verifiedAt ? `${names.get(String(d.verifiedBy)) ?? "—"}, ${fmtDateTime(d.verifiedAt)}` : "Not verified" },
                   { label: "Reconciliation note", value: d.reconciliationNote ?? "—" },
                   { label: "Status reason", value: d.statusReason ?? "—" },

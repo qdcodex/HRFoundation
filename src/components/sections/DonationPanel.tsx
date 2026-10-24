@@ -33,8 +33,8 @@ export function DonationPanel() {
       </div>
       <div className="grid gap-8 p-6 sm:grid-cols-[minmax(0,15rem)_1fr] sm:items-center sm:p-8">
         <div className="mx-auto w-full max-w-[15rem] overflow-hidden rounded-2xl border border-line bg-white">
-          {/* The QR image is shown exactly as supplied by the foundation. */}
-          <Image src={upi.qrImage} alt={upi.qrAlt} width={682} height={798} sizes="240px" className="h-auto w-full" priority />
+          {/* QR taken unaltered from the foundation's PNB merchant standee (only a white margin added). */}
+          <Image src={upi.qrImage} alt={upi.qrAlt} width={896} height={896} sizes="240px" className="h-auto w-full [image-rendering:pixelated]" priority />
         </div>
         <div>
           <p className="text-sm text-muted">Donating to</p>

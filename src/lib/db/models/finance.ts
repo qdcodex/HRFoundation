@@ -27,11 +27,12 @@ export interface IDonation {
   method: (typeof DONATION_METHODS)[number];
   transactionRef?: string | null;
   status: DonationStatus;
-  /** "manual" = recorded by staff (UPI/bank/cash); "gateway" = reserved for a future verified gateway integration. */
+  /** "manual" = recorded by staff (UPI/bank/cash); "gateway" = paid online through Razorpay and verified with Razorpay's API. */
   source: "manual" | "gateway";
   purpose?: string;
   statusReason?: string | null;
-  recordedBy: Types.ObjectId;
+  /** Null for online (gateway) donations, which are recorded automatically. */
+  recordedBy?: Types.ObjectId | null;
   verifiedBy?: Types.ObjectId | null;
   verifiedAt?: Date | null;
   /** Staff confirmed the credit in the bank statement / UPI account (screenshots are never proof). */
@@ -56,7 +57,7 @@ const DonationSchema = new Schema<IDonation>(
     source: { type: String, enum: ["manual", "gateway"], default: "manual" },
     purpose: { type: String, maxlength: 120 },
     statusReason: { type: String, default: null, maxlength: 500 },
-    recordedBy: { type: Schema.Types.ObjectId, ref: "AdminUser", required: true },
+    recordedBy: { type: Schema.Types.ObjectId, ref: "AdminUser", default: null },
     verifiedBy: { type: Schema.Types.ObjectId, ref: "AdminUser", default: null },
     verifiedAt: { type: Date, default: null },
     reconciliationNote: { type: String, default: null, maxlength: 500 },
@@ -127,7 +128,51 @@ export interface ICounter {
 }
 const CounterSchema = new Schema<ICounter>({ _id: String, seq: { type: Number, default: 0 } });
 
+/**
+ * An online payment started through Razorpay. Created before checkout opens; marked "paid" exactly once
+ * (atomically) when the payment is confirmed by the checkout signature or by the webhook.
+ */
+export interface IGatewayOrder {
+  _id: Types.ObjectId;
+  provider: "razorpay";
+  orderId: string;
+  kind: "donation" | "membership";
+  amountPaise: number;
+  status: "created" | "paid" | "failed";
+  donor?: { name: string; email?: string | null; phone?: string | null; purpose?: string | null } | null;
+  memberId?: Types.ObjectId | null;
+  paymentId?: string | null;
+  paidAt?: Date | null;
+  /** The Donation or MembershipPayment created for this order. */
+  resultId?: Types.ObjectId | null;
+  resultReference?: string | null;
+  error?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+const GatewayOrderSchema = new Schema<IGatewayOrder>(
+  {
+    provider: { type: String, enum: ["razorpay"], default: "razorpay" },
+    orderId: { type: String, required: true, unique: true },
+    kind: { type: String, enum: ["donation", "membership"], required: true },
+    amountPaise: { type: Number, required: true, min: 100, validate: Number.isInteger },
+    status: { type: String, enum: ["created", "paid", "failed"], default: "created", index: true },
+    donor: {
+      type: { name: String, email: String, phone: String, purpose: String, _id: false },
+      default: null,
+    },
+    memberId: { type: Schema.Types.ObjectId, ref: "Member", default: null, index: true },
+    paymentId: { type: String, default: null },
+    paidAt: { type: Date, default: null },
+    resultId: { type: Schema.Types.ObjectId, default: null },
+    resultReference: { type: String, default: null },
+    error: { type: String, default: null, maxlength: 500 },
+  },
+  { timestamps: true },
+);
+
 export const Donation = defineModel<IDonation>("Donation", DonationSchema);
+export const GatewayOrder = defineModel<IGatewayOrder>("GatewayOrder", GatewayOrderSchema);
 export const DonationReceipt = defineModel<IDonationReceipt>("DonationReceipt", DonationReceiptSchema);
 export const Counter = defineModel<ICounter>("Counter", CounterSchema);
 

@@ -1,6 +1,6 @@
 import "server-only";
 import type { Types } from "mongoose";
-import { ActionError, isDuplicateKey } from "@/lib/actions";
+import { ActionError, isDuplicateKey } from "@/lib/errors";
 import { normaliseTxnRef, TransactionRef } from "@/lib/db/models/membership";
 
 /** Reserves an external transaction reference so it can never be recorded twice (donations + membership payments). */

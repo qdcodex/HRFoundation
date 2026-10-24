@@ -93,11 +93,21 @@ Content principles: nothing is presented as an operating programme until approve
 4. Enable automated backups (Atlas: continuous backup; self-hosted: scheduled `mongodump` stored off-site, tested restores).
 5. Agree a data-retention policy (e.g. rejected applications, closed enquiries) and document it in the privacy policy.
 
-## 6. Not included (future work)
+## 6. Online payments (Razorpay)
+
+Donations (`/donate` → "Give online") and the membership fee (after applying, or at `/membership/pay`) can be paid through Razorpay Checkout. The section appears only when `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` are set.
+
+1. Razorpay Dashboard → API Keys: generate **test** keys and set `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` (Vercel → Environment Variables), then redeploy. Pages show "Test mode" while `rzp_test_` keys are used.
+2. Dashboard → Webhooks → Add webhook: URL `https://<domain>/api/payments/razorpay/webhook`, events `payment.captured` and `order.paid`, a secret of your choice → set it as `RAZORPAY_WEBHOOK_SECRET`.
+3. Run `npm run db:indexes` once against the production database (adds the `GatewayOrder` collection indexes).
+4. After Razorpay KYC is approved, replace the keys with `rzp_live_` keys and set up the webhook again in live mode.
+
+How it is verified: the server creates the order (the amount is never taken from the browser), checks the Checkout signature, re-reads the payment from Razorpay's API (order, amount and capture must match; authorised payments are captured), and records it exactly once even if the browser and the webhook confirm it at the same time. Online donations are recorded as **Verified** (source "gateway"); online membership fees are recorded as verified payments and move the application to **Pending approval** — activation still needs an authorised person.
+
+## 7. Not included (future work)
 
 These are deliberately not implemented and nothing in the UI pretends they exist:
 
-- **Online payment gateway** (Razorpay/Cashfree): needs server-side order creation, signed webhook verification and idempotent event handling. The data model reserves `source: "gateway"`.
 - **Online claim submission by nominees** (would need nominee identity verification). Claims are currently recorded by staff.
 - **SMS** notifications.
 - Two-factor authentication for administrators (recommended before launch).

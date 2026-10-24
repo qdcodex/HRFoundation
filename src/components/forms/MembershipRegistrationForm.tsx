@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import type { z } from "zod";
 import { Info, Loader2, Send } from "lucide-react";
@@ -10,6 +11,7 @@ import type { MembershipView } from "@/lib/membership-view";
 import { membershipSchema } from "@/lib/validation";
 import { ageOn, parseIsoDate, todayInIndia } from "@/lib/waiting-period";
 import { CheckboxField, FormStatus, Honeypot, SelectField, TextAreaField, TextField } from "./FormField";
+import { PayMembershipFeeButton } from "./PayMembershipFee";
 import { useFormSubmit } from "./useFormSubmit";
 
 type Input = z.input<typeof membershipSchema>;
@@ -40,7 +42,8 @@ function Section({ step, title, description, children }: { step: number; title: 
   );
 }
 
-export function MembershipRegistrationForm({ m }: { m: MembershipView }) {
+export function MembershipRegistrationForm({ m, onlinePayment = false }: { m: MembershipView; onlinePayment?: boolean }) {
+  const [paidMobile, setPaidMobile] = useState("");
   const {
     register,
     handleSubmit,
@@ -73,6 +76,7 @@ export function MembershipRegistrationForm({ m }: { m: MembershipView }) {
 
   const onSubmit = handleSubmit(async (values) => {
     if (await submit(values)) {
+      setPaidMobile(values.mobile);
       reset();
       window.scrollTo({ top: document.getElementById("register")?.offsetTop ?? 0, behavior: "smooth" });
     }
@@ -94,11 +98,16 @@ export function MembershipRegistrationForm({ m }: { m: MembershipView }) {
                 Your application reference is <strong className="font-mono">{state.reference}</strong>. Please keep it safe.
               </p>
               <p>
-                This is <strong>not</strong> a membership ID and your membership is <strong>not yet active</strong>. The
-                foundation will contact you about the membership fee, payment and approval. A membership ID and effective date
-                are issued only after activation, and the {m.waitingPeriodMonths}-month waiting period starts from that
-                date.
+                This is <strong>not</strong> a membership ID and your membership is <strong>not yet active</strong>.{" "}
+                {onlinePayment && m.feeLabel
+                  ? "Pay the membership fee online now, or the foundation will contact you about other ways to pay."
+                  : "The foundation will contact you about the membership fee, payment and approval."}{" "}
+                A membership ID and effective date are issued only after activation, and the {m.waitingPeriodMonths}-month
+                waiting period starts from that date.
               </p>
+              {onlinePayment && m.feeLabel && paidMobile && (
+                <PayMembershipFeeButton applicationRef={state.reference} mobile={paidMobile} feeLabel={m.feeLabel} />
+              )}
               {!state.delivered && (
                 <p className="text-sm text-muted">Development mode: email delivery is not configured, so no email was sent.</p>
               )}

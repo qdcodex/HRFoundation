@@ -138,7 +138,7 @@ export default async function MemberDetailPage({ params }: PageProps<"/admin/mem
                           <td className="px-5 py-3">
                             {PAYMENT_METHOD_LABELS[p.method]}
                             {p.transactionRef && <span className="block font-mono text-xs text-muted">{p.transactionRef}</span>}
-                            <span className="block text-xs text-muted">Recorded by {staff.get(String(p.recordedBy)) ?? "—"}</span>
+                            <span className="block text-xs text-muted">Recorded by {p.recordedBy ? (staff.get(String(p.recordedBy)) ?? "—") : "online payment (Razorpay)"}</span>
                           </td>
                           <td className="px-5 py-3">
                             <StatusBadge status={p.status} label={PAYMENT_STATUS_LABEL[p.status]} />

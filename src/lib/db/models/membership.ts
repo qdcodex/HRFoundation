@@ -152,7 +152,9 @@ const NomineeSchema = new Schema<INominee>(
   { timestamps: true },
 );
 
+/** Methods staff can record by hand. Online payments use "gateway" (see MEMBERSHIP_PAYMENT_METHODS). */
 export const PAYMENT_METHODS = ["upi", "bank_transfer", "cash", "cheque"] as const;
+export const MEMBERSHIP_PAYMENT_METHODS = [...PAYMENT_METHODS, "gateway"] as const;
 export const PAYMENT_METHOD_LABELS: Record<string, string> = {
   upi: "UPI",
   bank_transfer: "Bank transfer",
@@ -168,11 +170,12 @@ export interface IMembershipPayment {
   _id: Types.ObjectId;
   memberId: Types.ObjectId;
   amountPaise: number;
-  method: (typeof PAYMENT_METHODS)[number];
+  method: (typeof MEMBERSHIP_PAYMENT_METHODS)[number];
   transactionRef?: string | null;
   paidOn: string;
   status: MembershipPaymentStatus;
-  recordedBy: Types.ObjectId;
+  /** Null for online (gateway) payments, which are recorded automatically. */
+  recordedBy?: Types.ObjectId | null;
   verifiedBy?: Types.ObjectId | null;
   verifiedAt?: Date | null;
   rejectionReason?: string | null;
@@ -184,11 +187,11 @@ const MembershipPaymentSchema = new Schema<IMembershipPayment>(
   {
     memberId: { type: Schema.Types.ObjectId, ref: "Member", required: true, index: true },
     amountPaise: { type: Number, required: true, min: 1, validate: Number.isInteger },
-    method: { type: String, enum: PAYMENT_METHODS, required: true },
+    method: { type: String, enum: MEMBERSHIP_PAYMENT_METHODS, required: true },
     transactionRef: { type: String, default: null, maxlength: 64 },
     paidOn: { type: String, required: true, match: /^\d{4}-\d{2}-\d{2}$/ },
     status: { type: String, enum: MEMBERSHIP_PAYMENT_STATUSES, default: "verification_pending", index: true },
-    recordedBy: { type: Schema.Types.ObjectId, ref: "AdminUser", required: true },
+    recordedBy: { type: Schema.Types.ObjectId, ref: "AdminUser", default: null },
     verifiedBy: { type: Schema.Types.ObjectId, ref: "AdminUser", default: null },
     verifiedAt: { type: Date, default: null },
     rejectionReason: { type: String, default: null, maxlength: 500 },

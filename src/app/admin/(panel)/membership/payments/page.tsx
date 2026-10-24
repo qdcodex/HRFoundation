@@ -1,4 +1,3 @@
-import type { Types } from "mongoose";
 import { ListFilters } from "@/components/admin/list-filters";
 import { PaymentsTable, type PaymentRow } from "@/components/admin/membership/payments-table";
 import { PageHeader } from "@/components/admin/page-header";
@@ -41,7 +40,7 @@ export default async function MembershipPaymentsPage({ searchParams }: PageProps
   const members = new Map(
     (await Member.find({ _id: { $in: docs.map((d) => d.memberId) } }).select("fullName membershipId applicationRef").lean()).map((m) => [m._id.toString(), m]),
   );
-  const users = new Map((await AdminUser.find({ _id: { $in: docs.map((d) => d.recordedBy as Types.ObjectId) } }).select("name").lean()).map((u) => [u._id.toString(), u.name]));
+  const users = new Map((await AdminUser.find({ _id: { $in: docs.flatMap((d) => (d.recordedBy ? [d.recordedBy] : [])) } }).select("name").lean()).map((u) => [u._id.toString(), u.name]));
 
   const rows: PaymentRow[] = docs.map((p) => {
     const m = members.get(p.memberId.toString());
@@ -57,7 +56,7 @@ export default async function MembershipPaymentsPage({ searchParams }: PageProps
       paidOn: p.paidOn,
       status: p.status,
       statusLabel: STATUS_LABEL[p.status],
-      recordedBy: users.get(p.recordedBy.toString()) ?? "—",
+      recordedBy: p.recordedBy ? (users.get(p.recordedBy.toString()) ?? "—") : "Online (Razorpay)",
     };
   });
 

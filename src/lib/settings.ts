@@ -42,6 +42,7 @@ export const NOTIFICATION_EVENTS = {
   waiting_period_completed: { label: "Waiting period completed", to: "member", vars: ["name", "membershipId", "completedOn"] },
   claim_info_requested: { label: "Additional claim documents requested", to: "claimant", vars: ["name", "reference", "message"] },
   claim_decision: { label: "Claim decision recorded", to: "claimant", vars: ["name", "reference", "outcome"] },
+  donation_received: { label: "Online donation received (Razorpay)", to: "donor", vars: ["name", "amount", "reference", "paymentId"] },
   receipt_issued: { label: "Donation receipt issued", to: "donor", vars: ["name", "receiptNumber", "amount"] },
   claim_submitted: { label: "New online claim (to foundation inbox)", to: "foundation", vars: ["reference", "membershipId", "name"] },
   claim_document_uploaded: { label: "Family uploaded a claim document (to foundation inbox)", to: "foundation", vars: ["reference", "membershipId", "kind"] },
@@ -92,6 +93,11 @@ export const DEFAULT_TEMPLATES: Record<NotificationEvent, { enabled: boolean; su
     enabled: true,
     subject: "Decision on claim {{reference}}",
     body: "Dear {{name}},\n\nA decision has been recorded on claim {{reference}}: {{outcome}}. The foundation will contact you with details.\n\nH R Foundation",
+  },
+  donation_received: {
+    enabled: true,
+    subject: "Thank you for your donation ({{reference}})",
+    body: "Dear {{name}},\n\nThank you for your donation of {{amount}} to H R Foundation. Your payment was received online.\n\nDonation reference: {{reference}}\nPayment ID: {{paymentId}}\n\nPlease keep this email for your records. If you would like a donation receipt, reply with your full name and address, quoting the donation reference.\n\nH R Foundation",
   },
   receipt_issued: {
     enabled: true,

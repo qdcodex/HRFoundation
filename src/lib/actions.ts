@@ -3,20 +3,13 @@ import { z } from "zod";
 import { authorize, AuthError, type AdminContext } from "@/lib/auth/dal";
 import type { Permission } from "@/lib/auth/permissions";
 import { DatabaseNotConfiguredError } from "@/lib/db/connect";
+import { ActionError, isDuplicateKey } from "@/lib/errors";
 
 export type ActionResult<T = undefined> =
   | { ok: true; message?: string; data?: T }
   | { ok: false; error: string; fieldErrors?: Record<string, string> };
 
-/** Thrown inside action bodies for expected, user-facing failures (invalid state, duplicates, rules). */
-export class ActionError extends Error {
-  constructor(
-    message: string,
-    readonly fieldErrors?: Record<string, string>,
-  ) {
-    super(message);
-  }
-}
+export { ActionError, isDuplicateKey } from "@/lib/errors";
 
 export function zodFieldErrors(error: z.ZodError) {
   const out: Record<string, string> = {};
@@ -60,10 +53,6 @@ export async function runAction<S extends z.ZodType, T = undefined>(
     console.error("[admin action]", error);
     return { ok: false, error: "Something went wrong. The change was not saved." };
   }
-}
-
-export function isDuplicateKey(error: unknown): error is { code: 11000; keyValue?: Record<string, unknown> } {
-  return typeof error === "object" && error !== null && (error as { code?: number }).code === 11000;
 }
 
 /** Converts FormData into a plain object; repeated keys become arrays; checkboxes "on" → true. */

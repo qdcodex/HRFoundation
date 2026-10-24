@@ -1,22 +1,26 @@
 /**
  * Donation configuration.
  *
- * UPI: the QR image was supplied by the foundation (doc/scaner.jpeg → public/donate/hr-foundation-upi-qr.jpeg).
- * CLIENT TO CONFIRM that the UPI ID belongs to the foundation's own bank account before launch.
+ * UPI: QR from the foundation's PNB BHIM UPI merchant standee (doc/new scan.pdf → public/donate/hr-foundation-upi-qr.png).
+ * Merchant name "H R FOUNDATION", UPI ID 7702264242m@pnb.
  *
- * Online gateway: not approved — keep `enabled: false`. Integrating a gateway (Razorpay, Cashfree, etc.)
- * is a separate feature requiring server-side verification and webhooks; see README "Future work".
+ * Online gateway (Razorpay): switched on automatically when RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are set
+ * on the server (see src/lib/payments/razorpay.ts). `gateway.enabled` can force it off.
  */
 export const donation = {
   upi: {
     enabled: true,
     payeeName: "H R Foundation",
     upiId: "7702264242m@pnb",
-    qrImage: "/donate/hr-foundation-upi-qr.jpeg",
-    qrAlt: "UPI QR code for donations to H R Foundation. UPI ID 7702264242m@pnb.",
+    qrImage: "/donate/hr-foundation-upi-qr.png",
+    qrAlt: "BHIM UPI QR code for donations to H R Foundation (merchant H R FOUNDATION, UPI ID 7702264242m@pnb).",
   },
   gateway: {
-    enabled: false,
+    /** Set to false to hide online card/net-banking payments even when Razorpay keys are configured. */
+    enabled: true,
+    presetsInr: [500, 1000, 2000, 5000],
+    minInr: 10,
+    maxInr: 500000,
   },
   /** CLIENT TO CONFIRM: bank transfer details. null hides the section. */
   bankTransfer: null as null | { accountName: string; accountNumber: string; ifsc: string; bank: string; branch: string },

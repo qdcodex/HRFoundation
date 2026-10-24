@@ -1,5 +1,6 @@
 import { BadgeInfo, CreditCard, MessageSquareText, ReceiptText, ShieldCheck } from "lucide-react";
 import { CallToAction } from "@/components/sections/CallToAction";
+import { OnlineDonationForm } from "@/components/forms/OnlineDonationForm";
 import { DonationPanel } from "@/components/sections/DonationPanel";
 import { PageHero } from "@/components/sections/PageHero";
 import { TextLink } from "@/components/ui/Button";
@@ -8,6 +9,7 @@ import { EmptyState } from "@/components/ui/States";
 import { donation } from "@/content/donation";
 import { cmsPageMetadata } from "@/lib/metadata";
 import { getPage } from "@/lib/cms";
+import { isRazorpayEnabled, isTestMode } from "@/lib/payments/razorpay";
 
 export function generateMetadata() {
   return cmsPageMetadata("donate", "/donate");
@@ -15,6 +17,7 @@ export function generateMetadata() {
 
 export default async function DonatePage() {
   const page = await getPage("donate");
+  const online = isRazorpayEnabled();
   const steps = [
     { title: "Scan or copy", text: "Scan the QR code with any UPI app (such as BHIM, Google Pay, PhonePe or Paytm), or copy the UPI ID." },
     { title: "Check and pay", text: "Confirm the UPI ID, enter the amount you wish to give and complete the payment in your app." },
@@ -68,12 +71,33 @@ export default async function DonatePage() {
         </div>
       </section>
 
+      {online && (
+        <section id="online" className="scroll-mt-24 bg-white py-16 sm:py-24" aria-labelledby="online-heading">
+          <div className="container-site grid gap-12 lg:grid-cols-12">
+            <div className="lg:col-span-5">
+              <SectionHeading
+                id="online-heading"
+                index="02"
+                eyebrow="Give online"
+                title="Card, net banking, UPI or wallet."
+                intro="Choose an amount and pay securely through Razorpay. You receive an email confirmation straight away."
+              />
+            </div>
+            <div className="lg:col-span-7">
+              <div className="rounded-[2rem] bg-ivory p-6 ring-1 ring-line sm:p-8">
+                <OnlineDonationForm presets={donation.gateway.presetsInr} min={donation.gateway.minInr} max={donation.gateway.maxInr} testMode={isTestMode()} />
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="bg-forest py-16 text-ivory sm:py-24" aria-labelledby="receipts-heading">
         <div className="container-site">
           <SectionHeading
             id="receipts-heading"
             tone="dark"
-            index="02"
+            index={online ? "03" : "02"}
             eyebrow="Transparency & receipts"
             title="Know what you will receive."
           />
@@ -120,8 +144,8 @@ export default async function DonatePage() {
               Card and net-banking payments
             </h2>
             <p className="mt-2 leading-relaxed text-muted">
-              {donation.gateway.enabled
-                ? "You can also donate online by card or net banking."
+              {online
+                ? "You can also donate online by card, net banking, UPI or wallet in the “Give online” section above."
                 : "Online card and net-banking donations are not available yet. UPI is currently the only approved way to donate online."}
             </p>
           </div>

@@ -14,6 +14,7 @@ import { toMembershipView } from "@/lib/membership-view";
 import { publicSettings } from "@/lib/settings";
 import { cmsPageMetadata } from "@/lib/metadata";
 import { getPage } from "@/lib/cms";
+import { isRazorpayEnabled } from "@/lib/payments/razorpay";
 import { MembershipFaq } from "@/components/sections/MembershipFaq";
 import { MobileApplyBar } from "@/components/forms/MobileApplyBar";
 
@@ -24,6 +25,7 @@ export function generateMetadata() {
 export default async function MembershipPage() {
   const [page, rules] = await Promise.all([getPage("membership"), publicSettings("membershipRules")]);
   const m = toMembershipView(rules);
+  const online = isRazorpayEnabled();
   const facts = [
     { label: "Membership fee", value: (m.feeLabel ?? "To be confirmed") },
     { label: "Waiting period", value: `${m.waitingPeriodMonths} months` },
@@ -245,7 +247,16 @@ export default async function MembershipPage() {
             </div>
           </div>
           <div className="lg:col-span-8">
-            <MembershipRegistrationForm m={m} />
+            <MembershipRegistrationForm m={m} onlinePayment={online} />
+            {online && m.feeLabel && (
+              <p className="mt-6 text-sm text-muted">
+                Already applied?{" "}
+                <Link href="/membership/pay" className="font-semibold text-emerald-ink underline underline-offset-2">
+                  Pay your membership fee online
+                </Link>
+                .
+              </p>
+            )}
           </div>
         </div>
       </section>

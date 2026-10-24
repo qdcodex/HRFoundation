@@ -1,6 +1,6 @@
 import "server-only";
 import { audit } from "@/lib/audit";
-import { isDuplicateKey } from "@/lib/actions";
+import { isDuplicateKey } from "@/lib/errors";
 import { Claim, ClaimDocument, type ClaimStatus } from "@/lib/db/models/claims";
 import type { IMember, INominee } from "@/lib/db/models/membership";
 import { adminInbox, notify } from "@/lib/notifications";

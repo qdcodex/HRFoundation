@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Types } from "mongoose";
-import { MemberActions, NomineeEditor, NoteForm, PaymentVerifyActions } from "@/components/admin/membership/member-actions";
+import { IssueLoginButton, MemberActions, NomineeEditor, NoteForm, PaymentVerifyActions } from "@/components/admin/membership/member-actions";
+import { FileText } from "lucide-react";
 import { PageHeader } from "@/components/admin/page-header";
+import { Button } from "@/components/admin/ui/button";
 import { Badge, StatusBadge } from "@/components/admin/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, DetailList } from "@/components/admin/ui/card";
 import { AccessDenied, EmptyState, Notice } from "@/components/admin/ui/feedback";
@@ -226,6 +228,34 @@ export default async function MemberDetailPage({ params }: PageProps<"/admin/mem
               />
             </CardContent>
           </Card>
+
+          {member.membershipId && ["active", "suspended"].includes(member.status) && (
+            <Card>
+              <CardHeader>
+                <div>
+                  <CardTitle>Member portal & certificate</CardTitle>
+                  <CardDescription>The member signs in with their membership ID. Their family uses the same login to submit a claim.</CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <DetailList
+                  items={[
+                    { label: "Login issued", value: member.portal?.issuedAt ? fmtDateTime(member.portal.issuedAt) : "Not yet" },
+                    { label: "Password", value: !member.portal?.issuedAt ? "—" : member.portal.mustChangePassword ? "Temporary (not yet changed)" : "Set by member" },
+                    { label: "Last sign-in", value: member.portal?.lastLoginAt ? fmtDateTime(member.portal.lastLoginAt) : "Never" },
+                  ]}
+                />
+                <div className="flex flex-wrap gap-2">
+                  {can("membership:manage") && <IssueLoginButton memberId={id} issued={Boolean(member.portal?.issuedAt)} />}
+                  <Button asChild variant="outline" size="sm">
+                    <a href={`/admin/api/members/${id}/certificate`} target="_blank" rel="noopener">
+                      <FileText aria-hidden /> Certificate (PDF)
+                    </a>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>

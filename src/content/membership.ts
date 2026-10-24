@@ -47,7 +47,7 @@ export const applicationStates = [
   {
     key: "active",
     label: "Active",
-    description: "Membership approved. A membership ID and effective date are issued and the waiting period begins.",
+    description: "Membership approved. You receive a membership ID, login details and a downloadable certificate, and the waiting period begins.",
   },
 ] as const;
 

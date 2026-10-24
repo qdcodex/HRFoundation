@@ -160,7 +160,7 @@ export default async function MembershipPage() {
           <div className="lg:col-span-7">
             <ol className="space-y-5">
               {[
-                "The nominee submits the claim online with the membership ID, the nominee's registered mobile number and a copy of the death certificate, and receives a claim reference.",
+                "The nominee signs in to the member portal with the member's membership ID and password (or uses the form below with the nominee's registered mobile number) and uploads the death certificate. A claim reference is given at once.",
                 "The foundation verifies the death certificate, the membership status, the waiting period and the age condition.",
                 "The foundation contacts the nominee to confirm their bank account details. Bank details are never collected through this website.",
                 `After verification, the approved amount is transferred to the nominee's bank account — within ${m.claimTargetDays} days of receiving complete documents.`,
@@ -187,7 +187,7 @@ export default async function MembershipPage() {
               index="05"
               eyebrow="For nominees"
               title="Submit a claim."
-              intro="We are sorry for your loss. Please fill in this short form and attach the death certificate. We will contact you on the nominee's mobile number."
+              intro="We are sorry for your loss. If you have the member's login details, you can also sign in to the member portal to submit the claim and follow its progress."
             />
           </div>
           <div className="lg:col-span-8">

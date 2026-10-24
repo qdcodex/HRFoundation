@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { BadgeCheck, Ban, Flag, PauseCircle, PlayCircle, Plus, XCircle } from "lucide-react";
+import { BadgeCheck, Ban, Copy, Flag, KeyRound, PauseCircle, PlayCircle, Plus, XCircle } from "lucide-react";
+import { toast } from "sonner";
 import {
   addMemberNote,
   changeMemberStatus,
   decideApplication,
+  issueMemberLogin,
+  type LoginDetails,
   recordMembershipPayment,
   rejectMembershipPayment,
   setReviewFlag,
@@ -36,10 +39,13 @@ export function MemberActions({
   today: string;
   minEffectiveDate: string | null;
 }) {
+  // Held here (not in the approve dialog) because that dialog unmounts once the member becomes active.
+  const [login, setLogin] = useState<LoginDetails | null>(null);
   return (
     <div className="flex flex-wrap gap-2">
+      {login && <LoginDetailsDialog details={login} onClose={() => setLogin(null)} />}
       {canPay && !["rejected", "draft"].includes(status) && <RecordPaymentDialog memberId={memberId} today={today} />}
-      {canManage && status === "pending_approval" && <ApproveDialog memberId={memberId} today={today} minDate={minEffectiveDate} />}
+      {canManage && status === "pending_approval" && <ApproveDialog memberId={memberId} today={today} minDate={minEffectiveDate} onIssued={setLogin} />}
       {canManage && ["draft", "pending_payment", "payment_verification", "pending_approval"].includes(status) && (
         <ReasonDialog
           trigger={
@@ -174,11 +180,21 @@ export function ReasonDialog({
   );
 }
 
-function ApproveDialog({ memberId, today, minDate }: { memberId: string; today: string; minDate: string | null }) {
+function ApproveDialog({
+  memberId,
+  today,
+  minDate,
+  onIssued,
+}: {
+  memberId: string;
+  today: string;
+  minDate: string | null;
+  onIssued: (login: LoginDetails) => void;
+}) {
   const [open, setOpen] = useState(false);
   const [effectiveDate, setEffectiveDate] = useState(today);
   const [note, setNote] = useState("");
-  const { run, pending, fieldErrors } = useAction();
+  const { run, pending, fieldErrors } = useAction<LoginDetails>();
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -196,7 +212,10 @@ function ApproveDialog({ memberId, today, minDate }: { memberId: string; today: 
           onSubmit={async (e) => {
             e.preventDefault();
             const r = await run(decideApplication, { memberId, decision: "approve", effectiveDate, reason: note });
-            if (r.ok) setOpen(false);
+            if (r.ok) {
+              setOpen(false);
+              if (r.data) onIssued(r.data);
+            }
           }}
         >
           <Field id="effectiveDate" label="Effective membership date" required hint={minDate ? `Between ${minDate} (verified payment) and today.` : undefined} error={fieldErrors.effectiveDate}>
@@ -413,5 +432,85 @@ export function NomineeEditor({
         </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/* ---------- Member portal login ---------- */
+
+/** Shows a one-time password exactly once so staff can hand it to the member. */
+export function LoginDetailsDialog({ details, onClose }: { details: LoginDetails; onClose: () => void }) {
+  // Rendered only after an action completes in the browser, so `window` is available.
+  const url = `${window.location.origin}/member/login`;
+  const text = `H R Foundation member login
+Website: ${url}
+Membership ID: ${details.membershipId}
+Temporary password: ${details.password}
+You will be asked to choose your own password at first sign-in.`;
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent>
+        <DialogHeader
+          title="Member login details"
+          description={`Give these to ${details.name} in person or by message. The password is shown only now — it is not stored or emailed. The member must choose a new password at first sign-in.`}
+        />
+        <dl className="grid gap-3 rounded-lg border border-line bg-white p-4 text-sm">
+          <div>
+            <dt className="text-xs font-semibold tracking-wide text-muted uppercase">Sign-in page</dt>
+            <dd className="mt-1 font-mono break-all">{url}</dd>
+          </div>
+          <div>
+            <dt className="text-xs font-semibold tracking-wide text-muted uppercase">Membership ID</dt>
+            <dd className="mt-1 font-mono text-base font-semibold">{details.membershipId}</dd>
+          </div>
+          <div>
+            <dt className="text-xs font-semibold tracking-wide text-muted uppercase">Temporary password</dt>
+            <dd className="mt-1 font-mono text-xl font-bold tracking-wider">{details.password}</dd>
+          </div>
+        </dl>
+        <p className="text-xs text-muted">
+          Ask the member to keep these safe and to share them with their nominee, who will need them to submit a claim.
+        </p>
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigator.clipboard.writeText(text).then(() => toast.success("Copied."), () => toast.error("Could not copy."))}
+          >
+            <Copy aria-hidden /> Copy
+          </Button>
+          <Button type="button" onClick={onClose}>
+            Done
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function IssueLoginButton({ memberId, issued }: { memberId: string; issued: boolean }) {
+  const [login, setLogin] = useState<LoginDetails | null>(null);
+  const { run, pending } = useAction<LoginDetails>();
+  return (
+    <>
+      {login && <LoginDetailsDialog details={login} onClose={() => setLogin(null)} />}
+      <ConfirmDialog
+        trigger={
+          <Button variant="outline" size="sm" disabled={pending}>
+            <KeyRound aria-hidden /> {issued ? "Reset login" : "Issue login details"}
+          </Button>
+        }
+        title={issued ? "Reset the member's login?" : "Issue login details?"}
+        description={
+          issued
+            ? "A new temporary password will be created. The old password stops working and the member is signed out everywhere."
+            : "A temporary password will be created for the member portal."
+        }
+        confirmLabel={issued ? "Reset login" : "Create login"}
+        onConfirm={async () => {
+          const r = await run(issueMemberLogin, { memberId });
+          if (r.ok && r.data) setLogin(r.data);
+        }}
+      />
+    </>
   );
 }

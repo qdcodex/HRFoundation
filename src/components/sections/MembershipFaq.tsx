@@ -33,9 +33,19 @@ export function MembershipFaq({ m }: { m: MembershipView }) {
       q: "How does the nominee make a claim?",
       a: (
         <>
-          The nominee submits the claim on this page with the member&apos;s membership ID, their own mobile number (as registered) and a copy of the death
-          certificate. After verification, any approved amount is transferred to the nominee&apos;s bank account. We aim to complete the process within{" "}
+          The nominee signs in to the <Link href="/member/login" className="text-emerald-ink underline underline-offset-2">member portal</Link> with the
+          member&apos;s membership ID and password — or uses the form on this page with their registered mobile number — and uploads the death certificate. After verification, any approved amount is transferred to the nominee&apos;s bank account. We aim to complete the process within{" "}
           {m.claimTargetDays} days of receiving complete documents.
+        </>
+      ),
+    },
+    {
+      q: "Will I get a membership certificate?",
+      a: (
+        <>
+          Yes. Once your membership is activated, the foundation gives you login details for the{" "}
+          <Link href="/member/login" className="text-emerald-ink underline underline-offset-2">member portal</Link>, where you can download your membership
+          certificate at any time. Please share your login with your nominee so your family can submit a claim if ever needed.
         </>
       ),
     },

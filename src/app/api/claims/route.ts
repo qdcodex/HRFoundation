@@ -1,13 +1,10 @@
 import { z } from "zod";
-import { audit } from "@/lib/audit";
-import { isDuplicateKey } from "@/lib/actions";
 import { connectDb, isDatabaseConfigured } from "@/lib/db/connect";
-import { Claim, ClaimDocument } from "@/lib/db/models/claims";
 import { Member, Nominee } from "@/lib/db/models/membership";
-import { notify } from "@/lib/notifications";
-import { createReference, json, rateLimit, unavailable } from "@/lib/server/submissions";
+import { CLAIM_UPLOAD, fileOnlineClaim } from "@/lib/domain/online-claim";
+import { json, rateLimit, unavailable } from "@/lib/server/submissions";
 import { loadSettings } from "@/lib/settings";
-import { deleteFile, putFile, UploadError, validateUpload } from "@/lib/storage";
+import { UploadError, validateUpload } from "@/lib/storage";
 import { indianMobile } from "@/lib/validation";
 import { compareDates, parseIsoDate, todayInIndia } from "@/lib/waiting-period";
 
@@ -58,7 +55,7 @@ export async function POST(request: Request) {
 
   let file: Awaited<ReturnType<typeof validateUpload>> | null = null;
   try {
-    file = await validateUpload(form.get("certificate") as File, { allowed: ["application/pdf", "image/jpeg", "image/png"], maxBytes: 10 * 1024 * 1024 });
+    file = await validateUpload(form.get("certificate") as File, CLAIM_UPLOAD);
   } catch (error) {
     errors.certificate = error instanceof UploadError ? error.message : "Please attach the death certificate.";
   }
@@ -83,54 +80,19 @@ export async function POST(request: Request) {
       return json({ ok: false, message: "Please check the highlighted fields.", errors: { dateOfDeath: "Please check this date." } }, 422);
     }
 
-    const fileId = await putFile("private_files", { bytes: file.bytes, filename: file.filename, mime: file.mime, metadata: { kind: "Death certificate", source: "online" } });
-    let claim;
-    try {
-      claim = await new Claim({
-        reference: createReference("HRF-CL"),
-        memberId: member._id,
-        membershipId: member.membershipId,
-        memberName: member.fullName,
-        claimant: {
-          name: d.claimantName,
-          relationship: nominee.relationship === "other" ? (nominee.relationshipOther ?? "Other") : nominee.relationship,
-          mobile: d.nomineeMobile,
-          email: d.claimantEmail || null,
-          isNominee: true,
-        },
-        dateOfDeath: d.dateOfDeath,
-        receivedVia: "online",
-        submittedAt: new Date(),
-        status: "submitted",
-        createdBy: null,
-      }).save();
-    } catch (error) {
-      await deleteFile("private_files", fileId);
-      if (isDuplicateKey(error)) {
-        return json({ ok: false, message: "A claim for this membership is already being processed. Please contact the foundation for an update." }, 409);
-      }
-      throw error;
-    }
-    await ClaimDocument.create({
-      claimId: claim._id,
-      fileId,
-      kind: "Death certificate",
-      originalName: file.filename,
-      mime: file.mime,
-      size: file.size,
-      sha256: file.sha256,
-      uploadedBy: null,
-      uploadedByName: `${d.claimantName} (nominee, online)`,
+    const result = await fileOnlineClaim({
+      member,
+      nominee,
+      claimantName: d.claimantName,
+      claimantEmail: d.claimantEmail,
+      dateOfDeath: d.dateOfDeath,
+      file,
+      channel: "public form",
     });
-
-    await audit(
-      { id: null, name: "Public website (nominee)" },
-      { action: "claims.submitted_online", entityType: "Claim", entityId: claim.id, summary: `Nominee submitted claim ${claim.reference} for ${member.membershipId} with a death certificate.` },
-    );
-    const inbox = (await loadSettings("website")).enquiryInbox || process.env.FORM_TO_EMAIL;
-    await notify("claim_submitted", inbox, { reference: claim.reference, membershipId: member.membershipId ?? "", name: member.fullName }, { entity: "Claim", id: claim.id });
-
-    return json({ ok: true, reference: claim.reference, targetDays: rules.claimTargetDays });
+    if (!result.ok) {
+      return json({ ok: false, message: "A claim for this membership is already being processed. Please contact the foundation for an update." }, 409);
+    }
+    return json({ ok: true, reference: result.reference, targetDays: rules.claimTargetDays });
   } catch (error) {
     console.error("[api/claims]", error instanceof Error ? error.message : error);
     return unavailable();

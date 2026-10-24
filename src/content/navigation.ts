@@ -48,6 +48,7 @@ export const buildFooterNav = (services: ServiceLink[]): { title: string; links:
       { label: "Donate", href: "/donate" },
       { label: "Membership", href: "/membership" },
       { label: "Membership terms", href: "/membership/terms" },
+      { label: "Member login", href: "/member/login" },
       { label: "Get involved", href: "/get-involved" },
       { label: "Contact", href: "/contact" },
     ],

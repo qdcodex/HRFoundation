@@ -9,6 +9,8 @@ import { connectDb } from "@/lib/db/connect";
 import { nextSequence } from "@/lib/db/models/finance";
 import { Member, MembershipPayment, Nominee, NOMINEE_RELATIONSHIPS, PAYMENT_METHODS } from "@/lib/db/models/membership";
 import { reserveTxnRef, releaseTxnRef } from "@/lib/domain/txn";
+import { issueTemporaryPassword } from "@/lib/member-auth/credentials";
+import { canSignIn } from "@/lib/member-auth/session";
 import { formatPaise, parseRupeesToPaise } from "@/lib/money";
 import { notify } from "@/lib/notifications";
 import { createReference } from "@/lib/server/submissions";
@@ -169,8 +171,10 @@ const decisionSchema = z.discriminatedUnion("decision", [
   z.object({ memberId: objectId, decision: z.literal("reject"), reason: reason(10) }),
 ]);
 
+export type LoginDetails = { membershipId: string; name: string; password: string };
+
 export async function decideApplication(input: unknown) {
-  return runAction("membership:manage", decisionSchema, input, async (d, admin) => {
+  return runAction<typeof decisionSchema, LoginDetails>("membership:manage", decisionSchema, input, async (d, admin) => {
     await connectDb();
     const rules = await loadSettings("membershipRules");
     const member = await Member.findById(d.memberId).lean();
@@ -233,8 +237,31 @@ export async function decideApplication(input: unknown) {
       { name: activated.fullName, membershipId, effectiveDate: formatLong(eff), waitingEnds: formatLong(waitingEnds) },
       { entity: "Member", id: d.memberId },
     );
+    const password = await issueTemporaryPassword(activated._id);
+    await audit(admin, { action: "member_portal.login_issued", entityType: "Member", entityId: d.memberId, summary: `Issued member portal login for ${membershipId}.` });
     refresh(d.memberId);
-    return { ok: true, message: `Membership activated: ${membershipId}.` };
+    return { ok: true, message: `Membership activated: ${membershipId}.`, data: { membershipId, name: activated.fullName, password } };
+  });
+}
+
+/* ---------------- Member portal login ---------------- */
+
+const memberIdOnly = z.object({ memberId: objectId });
+
+export async function issueMemberLogin(input: unknown) {
+  return runAction<typeof memberIdOnly, LoginDetails>("membership:manage", memberIdOnly, input, async (d, admin) => {
+    await connectDb();
+    const member = await Member.findById(d.memberId).lean();
+    if (!member?.membershipId || !canSignIn(member.status)) throw new ActionError("Login details can only be issued for an active or suspended membership.");
+    const password = await issueTemporaryPassword(member._id);
+    await audit(admin, {
+      action: "member_portal.login_issued",
+      entityType: "Member",
+      entityId: d.memberId,
+      summary: `${member.portal?.issuedAt ? "Reset" : "Issued"} member portal login for ${member.membershipId}.`,
+    });
+    refresh(d.memberId);
+    return { ok: true, message: "New login details created.", data: { membershipId: member.membershipId, name: member.fullName, password } };
   });
 }
 

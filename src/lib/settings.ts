@@ -43,6 +43,7 @@ export const NOTIFICATION_EVENTS = {
   claim_decision: { label: "Claim decision recorded", to: "claimant", vars: ["name", "reference", "outcome"] },
   receipt_issued: { label: "Donation receipt issued", to: "donor", vars: ["name", "receiptNumber", "amount"] },
   claim_submitted: { label: "New online claim (to foundation inbox)", to: "foundation", vars: ["reference", "membershipId", "name"] },
+  claim_document_uploaded: { label: "Family uploaded a claim document (to foundation inbox)", to: "foundation", vars: ["reference", "membershipId", "kind"] },
   enquiry_received: { label: "New website enquiry (to foundation inbox)", to: "foundation", vars: ["reference", "kind", "name", "subject"] },
 } as const;
 export type NotificationEvent = keyof typeof NOTIFICATION_EVENTS;
@@ -93,6 +94,11 @@ export const DEFAULT_TEMPLATES: Record<NotificationEvent, { enabled: boolean; su
     enabled: true,
     subject: "[Website] New death-benefit claim {{reference}}",
     body: "A nominee has submitted claim {{reference}} for membership {{membershipId}} ({{name}}) with a death certificate.\n\nOpen the admin dashboard to review it.",
+  },
+  claim_document_uploaded: {
+    enabled: true,
+    subject: "[Website] New document for claim {{reference}}",
+    body: "The family uploaded a document ({{kind}}) for claim {{reference}} (membership {{membershipId}}) through the member portal.\n\nOpen the admin dashboard to review it.",
   },
   enquiry_received: {
     enabled: true,

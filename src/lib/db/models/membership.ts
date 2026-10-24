@@ -66,6 +66,16 @@ export interface IMember {
   requiresReview: boolean;
   reviewReason?: string | null;
   notes: INote[];
+  /** Member portal login. Username is the membership ID; set when the foundation issues login details. */
+  portal?: {
+    passwordHash?: string | null;
+    mustChangePassword: boolean;
+    failedLoginCount: number;
+    lockedUntil?: Date | null;
+    issuedAt?: Date | null;
+    lastLoginAt?: Date | null;
+    passwordChangedAt?: Date | null;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -100,6 +110,15 @@ const MemberSchema = new Schema<IMember>(
     requiresReview: { type: Boolean, default: false },
     reviewReason: { type: String, default: null, maxlength: 500 },
     notes: { type: [NoteSchema], default: [] },
+    portal: {
+      passwordHash: { type: String, default: null, select: false },
+      mustChangePassword: { type: Boolean, default: true },
+      failedLoginCount: { type: Number, default: 0 },
+      lockedUntil: { type: Date, default: null },
+      issuedAt: { type: Date, default: null },
+      lastLoginAt: { type: Date, default: null },
+      passwordChangedAt: { type: Date, default: null },
+    },
   },
   { timestamps: true },
 );

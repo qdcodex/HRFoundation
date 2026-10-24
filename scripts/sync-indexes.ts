@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import { connectDb } from "@/lib/db/connect";
 import "@/lib/db/models/auth";
 import "@/lib/db/models/membership";
+import "@/lib/db/models/member-auth";
 import "@/lib/db/models/finance";
 import "@/lib/db/models/claims";
 import "@/lib/db/models/content";

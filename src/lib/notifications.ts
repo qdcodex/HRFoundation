@@ -1,5 +1,5 @@
 import "server-only";
-import { siteUrl } from "@/content/site";
+import { site, siteUrl } from "@/content/site";
 import { connectDb } from "@/lib/db/connect";
 import { Notification } from "@/lib/db/models/system";
 import { senderAddress, sendEmail, type EmailAttachment } from "@/lib/server/email";
@@ -9,10 +9,13 @@ function render(template: string, vars: Record<string, string>) {
   return template.replace(/\{\{(\w+)\}\}/g, (_, k: string) => vars[k] ?? "");
 }
 
-/** Where foundation copies and alerts go: Website Settings → enquiry inbox, then FORM_TO_EMAIL, then the sending mailbox. */
+/**
+ * Where foundation alerts and copies go: Website Settings → enquiry inbox, then FORM_TO_EMAIL,
+ * then the foundation's official email (src/content/site.ts), then the sending mailbox.
+ */
 export async function adminInbox() {
   const website = await loadSettings("website").catch(() => null);
-  return website?.enquiryInbox || process.env.FORM_TO_EMAIL || senderAddress();
+  return website?.enquiryInbox || process.env.FORM_TO_EMAIL || site.contact.email || senderAddress();
 }
 
 const HIDDEN = "(sent to the recipient only)";

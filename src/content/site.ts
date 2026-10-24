@@ -30,11 +30,12 @@ export const site = {
 
   /**
    * Public contact details:
-   * Only the official email address is displayed publicly.
+   * CLIENT-SPECIFIED: the foundation's official email. It is shown on the website and receives all
+   * website alerts and copies of emails to members/donors (unless Website settings → enquiry inbox overrides it).
    * Office address and mobile numbers are omitted from public display.
    */
   contact: {
-    email: "contact@hrfoundationindia.org" as string,
+    email: "hrfoundation4242@gmail.com" as string,
     phone: null as string | null,
     whatsapp: null as string | null,
     hours: null as string | null,

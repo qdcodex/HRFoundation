@@ -1,5 +1,6 @@
 import "server-only";
 import nodemailer, { type Transporter } from "nodemailer";
+import { site } from "@/content/site";
 
 /**
  * Email transport.
@@ -52,7 +53,8 @@ export async function sendEmail(message: {
       await smtp().sendMail({
         from: process.env.EMAIL_FROM || `"H R Foundation" <${process.env.EMAIL_USER}>`,
         to: message.to,
-        replyTo: message.replyTo || undefined,
+        // Replies from members and donors go to the foundation's official mailbox.
+        replyTo: message.replyTo || site.contact.email || undefined,
         subject: message.subject,
         text: message.text,
         html: message.html,
@@ -70,7 +72,7 @@ export async function sendEmail(message: {
       body: JSON.stringify({
         from,
         to: [message.to],
-        reply_to: message.replyTo || undefined,
+        reply_to: message.replyTo || site.contact.email || undefined,
         subject: message.subject,
         text: message.text,
         html: message.html,

@@ -5,7 +5,7 @@ import { MemberLoginForm } from "@/components/forms/MemberAuthForms";
 import { site } from "@/content/site";
 import { getMember } from "@/lib/member-auth/session";
 
-export const metadata = { title: "Member login", alternates: { canonical: "/member/login" } };
+export const metadata = { title: "Member login" };
 
 export default function MemberLoginPage() {
   return (

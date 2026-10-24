@@ -29,7 +29,7 @@ export function DonationPanel() {
     <div className="overflow-hidden rounded-[2rem] bg-white shadow-[0_30px_60px_-40px_rgba(14,42,34,0.6)] ring-1 ring-line">
       <div className="flex items-center justify-between bg-forest px-6 py-4 text-ivory">
         <p className="font-display font-bold">Scan & pay with any UPI app</p>
-        <span className="rounded-full bg-ivory/10 px-3 py-1 text-xs font-semibold text-gold">UPI</span>
+        <span className="rounded-full bg-ivory/10 px-3 py-1 text-xs font-semibold text-gold-soft">UPI</span>
       </div>
       <div className="grid gap-8 p-6 sm:grid-cols-[minmax(0,15rem)_1fr] sm:items-center sm:p-8">
         <div className="mx-auto w-full max-w-[15rem] overflow-hidden rounded-2xl border border-line bg-white">

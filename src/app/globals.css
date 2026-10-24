@@ -4,7 +4,7 @@
  * H R Foundation design system — "A Future Built on Compassion"
  * Colour tokens are tuned for WCAG AA contrast:
  *  - emerald-ink (#1C6E55) is the text/link variant of emerald on light backgrounds
- *  - gold-ink (#86662C) is the text variant of the gold accent on light backgrounds
+ *  - gold-ink (#765923) is the text variant of the gold accent on light backgrounds
  *  - gold (#C7A56A) is used on forest backgrounds or decoratively only
  */
 @theme {
@@ -22,7 +22,7 @@
   --color-line: #ddd7c8;
   --color-gold: #c7a56a;
   --color-gold-soft: #ead9b6;
-  --color-gold-ink: #86662c;
+  --color-gold-ink: #765923; /* ≥4.5:1 on ivory, sage and gold-soft */
   --color-danger: #a8322a;
 
   --font-display: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;

@@ -42,7 +42,7 @@ export function BrandLogo({ className, sizes = "320px" }: { className?: string; 
 
 export function BrandLink({ tone = "dark", className, onClick }: { tone?: "dark" | "light"; className?: string; onClick?: () => void }) {
   return (
-    <Link href="/" onClick={onClick} className={cn("flex items-center gap-3 rounded-md", className)} aria-label="H R Foundation — home">
+    <Link href="/" onClick={onClick} className={cn("flex items-center gap-3 rounded-md", className)}>
       {tone === "dark" ? (
         <BrandMark priority />
       ) : (

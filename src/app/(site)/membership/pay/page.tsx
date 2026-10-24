@@ -9,7 +9,7 @@ import { publicSettings } from "@/lib/settings";
 
 export const metadata = {
   title: "Pay membership fee",
-  description: "Pay your H R Foundation membership fee online with your application reference.",
+  description: "Pay your H R Foundation membership fee securely online by card, net banking or UPI using your application reference and registered mobile number.",
   alternates: { canonical: "/membership/pay" },
 };
 

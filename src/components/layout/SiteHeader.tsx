@@ -37,8 +37,8 @@ export function SiteHeader({ nav, pathname = "" }: { nav: NavItem[]; pathname?: 
         scrolled ? "border-line shadow-[0_6px_24px_-18px_rgba(21,61,50,0.45)]" : "border-transparent",
       )}
     >
-      <div className="container-site flex h-[4.5rem] items-center justify-between gap-6">
-        <BrandLink />
+      <div className="container-site flex h-[4.5rem] items-center justify-between gap-3 sm:gap-6">
+        <BrandLink compact />
 
         <nav aria-label="Main" className="hidden xl:block">
           <ul className="flex items-center gap-1">

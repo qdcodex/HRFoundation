@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, HeartHandshake, Menu, X } from "lucide-react";
 import type { NavItem } from "@/content/navigation";
 import { BrandLink } from "@/components/ui/Brand";
 import { buttonClasses } from "@/components/ui/Button";
@@ -31,13 +31,12 @@ export function MobileNavigation({ nav, pathname }: { nav: NavItem[]; pathname: 
   const close = () => setOpen(false);
 
   return (
-    <div className="flex items-center gap-2 xl:hidden">
-      <span className="hidden sm:block">
-        <Link href="/donate" className={buttonClasses("outline", "md", "h-10 px-4")}>
-          Donate
-        </Link>
-      </span>
-      <Link href="/membership" className={buttonClasses("gold", "md", "h-10 px-4")}>
+    <div className="flex items-center gap-1.5 sm:gap-2 xl:hidden">
+      <Link href="/donate" className={buttonClasses("primary", "md", "h-10 gap-1.5 px-3 sm:px-4")}>
+        <HeartHandshake aria-hidden className="size-4 max-[379px]:hidden" />
+        Donate
+      </Link>
+      <Link href="/membership" className={buttonClasses("gold", "md", "h-10 px-3 sm:px-4")}>
         <span className="sm:hidden">Join</span>
         <span className="hidden sm:inline">Become a member</span>
       </Link>
@@ -46,7 +45,7 @@ export function MobileNavigation({ nav, pathname }: { nav: NavItem[]; pathname: 
         onClick={() => setOpen(true)}
         aria-haspopup="dialog"
         aria-expanded={open}
-        className="grid size-11 place-items-center rounded-full border border-forest/20 text-forest transition-colors hover:bg-sage"
+        className="grid size-10 shrink-0 place-items-center rounded-full border border-forest/20 text-forest transition-colors hover:bg-sage sm:size-11"
       >
         <Menu aria-hidden className="size-5" />
         <span className="sr-only">Open menu</span>

@@ -40,7 +40,18 @@ export function BrandLogo({ className, sizes = "320px" }: { className?: string; 
   );
 }
 
-export function BrandLink({ tone = "dark", className, onClick }: { tone?: "dark" | "light"; className?: string; onClick?: () => void }) {
+export function BrandLink({
+  tone = "dark",
+  compact = false,
+  className,
+  onClick,
+}: {
+  tone?: "dark" | "light";
+  /** Hide the wordmark below 440px (site header). */
+  compact?: boolean;
+  className?: string;
+  onClick?: () => void;
+}) {
   return (
     <Link href="/" onClick={onClick} className={cn("flex items-center gap-3 rounded-md", className)}>
       {tone === "dark" ? (
@@ -50,7 +61,8 @@ export function BrandLink({ tone = "dark", className, onClick }: { tone?: "dark"
           <BrandMark className="h-9" />
         </span>
       )}
-      <span className="flex flex-col leading-none">
+      {/* On narrow phones only the logo mark shows, to leave room for the Donate and Join buttons; the name stays for screen readers. */}
+      <span className={cn("flex flex-col leading-none", compact && "max-[439px]:sr-only")}>
         <span className={cn("whitespace-nowrap font-display text-[1.05rem] font-extrabold tracking-tight", tone === "dark" ? "text-forest" : "text-ivory")}>
           H R Foundation
         </span>

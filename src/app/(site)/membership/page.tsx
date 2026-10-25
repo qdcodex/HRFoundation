@@ -193,17 +193,13 @@ export default async function MembershipPage() {
             />
           </div>
           <div className="lg:col-span-8">
-            {m.schemeApproved ? (
-              <ClaimForm targetDays={m.claimTargetDays} />
-            ) : (
-              <PendingNote>
-                The online claim form opens once the membership scheme is formally approved. Until then, please{" "}
-                <Link href="/contact" className="text-emerald-ink underline underline-offset-2">
-                  contact the foundation
-                </Link>
-                .
+            {!m.schemeApproved && (
+              <PendingNote className="mb-8">
+                The death-benefit scheme is awaiting formal approval. You can submit the claim and death certificate now and the
+                foundation will start verifying it, but any payment can be made only after the scheme is approved.
               </PendingNote>
             )}
+            <ClaimForm targetDays={m.claimTargetDays} />
           </div>
         </div>
       </section>

@@ -16,7 +16,8 @@ import { compareDates, parseIsoDate, todayInIndia } from "@/lib/waiting-period";
  *   returns the same generic message (no way to discover which memberships exist).
  * - The certificate is checked by file content (PDF/JPG/PNG, max 10 MB) and stored in the PRIVATE bucket.
  * - One open claim per member; per-IP rate limit; honeypot.
- * - Submitting a claim never approves or pays anything: staff verify and record a decision.
+ * - Submitting a claim never approves or pays anything: staff verify and record a decision
+ *   (and approval is blocked while the scheme is still marked "proposed").
  */
 const schema = z.object({
   membershipId: z.string().trim().toUpperCase().min(5, "Enter the membership ID.").max(30),
@@ -68,10 +69,8 @@ export async function POST(request: Request) {
   try {
     if (!(await rateLimit(request, "claims", 3, 3600))) return json({ ok: false, message: "Too many submissions. Please try again later or contact the foundation." }, 429);
     await connectDb();
+    // Claims are accepted while the scheme is still "proposed"; approval stays blocked in the admin until it is approved.
     const rules = await loadSettings("membershipRules");
-    if (!rules.schemeApproved) {
-      return json({ ok: false, message: "Online claims open once the membership scheme is approved. Please contact the foundation." }, 403);
-    }
 
     const member = await Member.findOne({ membershipId: d.membershipId }).lean();
     const nominee = member ? await Nominee.findOne({ memberId: member._id }).lean() : null;

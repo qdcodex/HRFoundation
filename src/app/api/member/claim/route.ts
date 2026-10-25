@@ -44,8 +44,8 @@ export async function POST(request: Request) {
     if (!parsed.success || !file || Object.keys(errors).length) return json({ ok: false, message: "Please check the highlighted fields.", errors }, 422);
 
     if (!(await rateLimit(request, "member-claims", 5, 3600))) return json({ ok: false, message: "Too many submissions. Please try again later or contact the foundation." }, 429);
+    // Accepted while the scheme is "proposed"; approval stays blocked in the admin until it is approved.
     const rules = await loadSettings("membershipRules");
-    if (!rules.schemeApproved) return json({ ok: false, message: "Online claims open once the membership scheme is approved. Please contact the foundation." }, 403);
     const nominee = await Nominee.findOne({ memberId: member._id }).lean();
     if (!nominee) return json({ ok: false, message: "No nominee is recorded for this membership. Please contact the foundation." }, 422);
 

@@ -176,17 +176,13 @@ async function Dashboard({ searchParams }: Pick<PageProps<"/member">, "searchPar
         {!openClaim && (
           <div className="mt-8 border-t border-line pt-8">
             <h3 className="mb-6 font-display text-lg font-bold text-forest">Submit a claim</h3>
-            {rules.schemeApproved ? (
-              <ClaimForm targetDays={rules.claimTargetDays} portal />
-            ) : (
-              <PendingNote>
-                Online claims open once the membership scheme is formally approved. Until then, please email{" "}
-                <a href={`mailto:${site.contact.email}`} className="text-emerald-ink underline underline-offset-2">
-                  {site.contact.email}
-                </a>
-                .
+            {!rules.schemeApproved && (
+              <PendingNote className="mb-6">
+                The death-benefit scheme is awaiting formal approval. You can submit the claim now and the foundation will start
+                verifying it, but any payment can be made only after the scheme is approved.
               </PendingNote>
             )}
+            <ClaimForm targetDays={rules.claimTargetDays} portal />
           </div>
         )}
       </div>

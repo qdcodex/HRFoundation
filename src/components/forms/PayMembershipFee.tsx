@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { CreditCard, Loader2 } from "lucide-react";
+import { CreditCard, Loader2, LockKeyhole } from "lucide-react";
 import { buttonClasses } from "@/components/ui/Button";
 import { FormStatus, TextField } from "./FormField";
 import { payWithRazorpay } from "./razorpay-checkout";
@@ -22,6 +22,19 @@ function Paid({ paymentId }: { paymentId: string }) {
         ),
       }}
     />
+  );
+}
+
+/** Makes it clear the payment is handled by Razorpay and which methods are accepted. */
+function SecuredByRazorpay() {
+  return (
+    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted">
+      <span className="inline-flex items-center gap-1 font-semibold text-forest">
+        <LockKeyhole aria-hidden className="size-3.5" /> Secured by Razorpay
+      </span>
+      <span aria-hidden>·</span>
+      <span>UPI, debit &amp; credit cards, net banking and wallets</span>
+    </p>
   );
 }
 
@@ -46,8 +59,9 @@ export function PayMembershipFeeButton({ applicationRef, mobile, feeLabel }: { a
         }}
       >
         {busy ? <Loader2 aria-hidden className="size-4 animate-spin" /> : <CreditCard aria-hidden className="size-4" />}
-        {busy ? "Opening secure payment…" : `Pay ${feeLabel} online now`}
+        {busy ? "Opening Razorpay…" : `Pay ${feeLabel} with Razorpay`}
       </button>
+      <SecuredByRazorpay />
       <FormStatus state={status.kind === "error" ? status : { kind: "idle" }} />
     </div>
   );
@@ -87,8 +101,9 @@ export function PayMembershipFeeForm({ feeLabel, testMode }: { feeLabel: string;
       <FormStatus state={status.kind === "error" ? status : { kind: "idle" }} />
       <button type="submit" disabled={busy} className={buttonClasses("primary", "lg", "w-full sm:w-auto")}>
         {busy ? <Loader2 aria-hidden className="size-4 animate-spin" /> : <CreditCard aria-hidden className="size-4" />}
-        {busy ? "Opening secure payment…" : `Pay ${feeLabel} online`}
+        {busy ? "Opening Razorpay…" : `Pay ${feeLabel} with Razorpay`}
       </button>
+      <SecuredByRazorpay />
     </form>
   );
 }

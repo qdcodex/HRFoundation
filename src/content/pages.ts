@@ -200,7 +200,7 @@ The membership scheme and death-benefit provision are governed by the [membershi
 
 ## Donations
 
-Donations are voluntary. Please verify the UPI ID before paying. Information on tax-deduction eligibility is provided only after the relevant approval is received; please do not assume a deduction is available.
+Donations are voluntary. Please verify the UPI ID before paying. Refunds and cancellations follow our [refund & cancellation policy](/refund-policy). Information on tax-deduction eligibility is provided only after the relevant approval is received; please do not assume a deduction is available.
 
 ## Acceptable use
 
@@ -227,6 +227,56 @@ These terms are governed by the laws of India. Courts in Telangana will have jur
 ## Contact
 
 Questions about these terms can be sent through our [contact page](/contact).`,
+  },
+  {
+    // CLIENT TO CONFIRM: the refund rules below follow how the website works today; the trustees should approve them.
+    key: "refund-policy",
+    path: "/refund-policy",
+    label: "Refund & cancellation policy",
+    title: "Refund & cancellation policy.",
+    intro: "How refunds and cancellations work for donations and the membership fee paid to H R Foundation.",
+    seoTitle: "Refund & Cancellation Policy",
+    seoDescription:
+      "Refund and cancellation policy of H R Foundation for online donations and the one-time membership fee, including duplicate payments, failed payments and how to request a refund.",
+    body: `## Payments covered
+
+This policy applies to payments made to ${site.name} through this website — online payments processed by Razorpay (card, net banking, UPI and wallets) — and to UPI payments made by scanning the foundation's QR code.
+
+## Donations
+
+- Donations are voluntary gifts to a charitable trust and are **not refundable** once received, except in the cases below.
+- **Duplicate or incorrect payments:** if you paid twice, paid the wrong amount by mistake, or a payment was made without your authorisation, email us within **7 days** of the payment. We will check it against our records and, if confirmed, refund the extra or incorrect amount in full.
+- If a donation receipt was issued for a donation that is refunded, the receipt will be cancelled.
+
+## Membership fee
+
+The membership fee is ₹2,000, paid once.
+
+- **Application not approved:** if the foundation does not approve your application, the fee is refunded in full.
+- **Cancelling before activation:** you may cancel your application at any time before your membership is activated (before a membership ID is issued) and receive a full refund.
+- **After activation:** once your membership is activated, the fee is not refundable, except for duplicate or incorrect payments as described above.
+
+Payments made by the foundation to a nominee under the membership scheme are not refunds and are handled through the claim process described in the [membership terms](/membership/terms).
+
+## Failed or pending payments
+
+If money was debited but the payment failed or was not confirmed, it is normally reversed automatically by your bank or Razorpay within 5–7 working days. If it is not, email us with the payment ID or UPI transaction reference (UTR).
+
+## How to request a refund or cancellation
+
+Email **${site.contact.email}** with your name, the date and amount, and the payment ID, UPI reference (UTR), donation reference or application reference. We reply within 3 working days.
+
+## When refunds are paid
+
+Approved refunds are sent to the original payment method — the same card, bank account or UPI ID. We initiate them within 7 working days of approval; your bank usually credits online refunds within 5–7 working days after that. We do not refund in cash.
+
+## Delivery of services
+
+No physical goods are sold or shipped. Donation confirmations are sent by email straight after payment. Membership ID, login details and the membership certificate are sent by email and are available in the member portal once membership is activated.
+
+## Contact
+
+Questions about this policy can be sent to ${site.contact.email} or through our [contact page](/contact).`,
   },
 ];
 

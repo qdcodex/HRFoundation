@@ -41,7 +41,8 @@ export default async function MembershipTermsPage() {
             <h2>2. Membership</h2>
             <ul>
               <li>
-                Membership fee: {m.feeLabel ?? "to be confirmed by the foundation"}.
+                Membership fee: {m.feeLabel ?? "to be confirmed by the foundation"}. Refunds and cancellations follow our{" "}
+                <Link href="/refund-policy">refund &amp; cancellation policy</Link>.
               </li>
               <li>Applicants must be at least {m.minApplicantAge} years old and provide accurate information.</li>
               <li>

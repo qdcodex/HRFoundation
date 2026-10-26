@@ -58,4 +58,5 @@ export const buildFooterNav = (services: ServiceLink[]): { title: string; links:
 export const legalNav: NavLink[] = [
   { label: "Privacy policy", href: "/privacy-policy" },
   { label: "Terms of use", href: "/terms" },
+  { label: "Refund & cancellation", href: "/refund-policy" },
 ];

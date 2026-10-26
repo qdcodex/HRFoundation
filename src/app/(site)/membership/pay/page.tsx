@@ -49,7 +49,11 @@ export default async function PayMembershipPage() {
               Apply for membership
             </Link>{" "}
             first. After your payment is confirmed, the foundation reviews your application and sends your membership ID, login
-            details and certificate.
+            details and certificate. The fee is refunded in full if your application is not approved — see our{" "}
+            <Link href="/refund-policy" className="text-emerald-ink underline underline-offset-2">
+              refund &amp; cancellation policy
+            </Link>
+            .
           </p>
         </div>
       </section>

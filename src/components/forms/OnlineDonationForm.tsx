@@ -133,7 +133,13 @@ export function OnlineDonationForm({ presets, min, max, testMode }: { presets: r
         {busy ? <Loader2 aria-hidden className="size-4 animate-spin" /> : <CreditCard aria-hidden className="size-4" />}
         {busy ? "Opening secure payment…" : `Donate${Number(amount) > 0 ? ` ₹${Number(amount).toLocaleString("en-IN")}` : ""} online`}
       </button>
-      <p className="text-xs text-muted">Payments are processed securely by Razorpay. Card, net banking, UPI and wallets are accepted.</p>
+      <p className="text-xs text-muted">
+        Payments are processed securely by Razorpay. Card, net banking, UPI and wallets are accepted. See our{" "}
+        <Link href="/refund-policy" className="text-emerald-ink underline underline-offset-2">
+          refund &amp; cancellation policy
+        </Link>
+        .
+      </p>
     </form>
   );
 }

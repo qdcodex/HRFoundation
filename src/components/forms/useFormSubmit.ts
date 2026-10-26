@@ -12,7 +12,8 @@ export type SubmitState =
 export function useFormSubmit<T extends FieldValues>(endpoint: string, setError: UseFormSetError<T>) {
   const [state, setState] = useState<SubmitState>({ kind: "idle" });
 
-  async function submit(values: unknown) {
+  /** Returns the created reference on success (truthy), or false. */
+  async function submit(values: unknown): Promise<false | { reference: string }> {
     setState({ kind: "idle" });
     try {
       const res = await fetch(endpoint, {
@@ -29,7 +30,7 @@ export function useFormSubmit<T extends FieldValues>(endpoint: string, setError:
       };
       if (res.ok && data.ok) {
         setState({ kind: "success", reference: data.reference ?? "", delivered: Boolean(data.delivered) });
-        return true;
+        return { reference: data.reference ?? "" };
       }
       if (data.errors) {
         for (const [field, message] of Object.entries(data.errors)) setError(field as Path<T>, { type: "server", message });

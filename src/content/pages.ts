@@ -252,9 +252,9 @@ This policy applies to payments made to ${site.name} through this website — on
 
 The membership fee is ₹2,000, paid once.
 
-- **Application not approved:** if the foundation does not approve your application, the fee is refunded in full.
-- **Cancelling before activation:** you may cancel your application at any time before your membership is activated (before a membership ID is issued) and receive a full refund.
-- **After activation:** once your membership is activated, the fee is not refundable, except for duplicate or incorrect payments as described above.
+- **Online payments:** your membership is activated as soon as the payment succeeds, and the fee is then not refundable, except for duplicate or incorrect payments as described above.
+- **Payments made by other means:** if the foundation does not accept your application, or you cancel before your membership is activated (before a membership ID is issued), the fee is refunded in full.
+- If the foundation later finds that an application did not meet the membership rules (for example, the applicant's age), the membership may be cancelled and the fee refunded in full.
 
 Payments made by the foundation to a nominee under the membership scheme are not refunds and are handled through the claim process described in the [membership terms](/membership/terms).
 

@@ -34,20 +34,18 @@ export const membership = {
 export const formatInr = (amount: number) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(amount);
 
-/** Application lifecycle used by the (future) administration workflow and explained to applicants. */
-export const applicationStates = [
-  { key: "draft", label: "Draft", description: "Application started but not yet submitted." },
-  { key: "pending_payment", label: "Pending payment", description: "Submitted; the approved membership fee is awaited." },
+/** How joining works, as explained on the membership page. */
+export const joiningSteps = [
+  { key: "apply", label: "Apply online", description: "Fill in your details and your nominee's details. It takes about two minutes." },
   {
-    key: "payment_verification",
-    label: "Payment verification pending",
-    description: "The foundation is checking that the payment has been received.",
+    key: "pay",
+    label: "Pay the fee",
+    description: "Pay the one-time fee securely with Razorpay — UPI, cards, net banking or wallets. You can also pay the foundation directly; it then verifies the payment.",
   },
-  { key: "pending_approval", label: "Pending approval", description: "Details and payment verified; awaiting approval." },
   {
     key: "active",
-    label: "Active",
-    description: "Membership approved. You receive a membership ID, login details and a downloadable certificate, and the waiting period begins.",
+    label: "Membership active",
+    description: "As soon as an online payment succeeds you get your membership ID and certificate, and login details by email. The waiting period starts that day.",
   },
 ] as const;
 

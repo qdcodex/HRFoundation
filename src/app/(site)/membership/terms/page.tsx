@@ -46,8 +46,8 @@ export default async function MembershipTermsPage() {
               </li>
               <li>Applicants must be at least {m.minApplicantAge} years old and provide accurate information.</li>
               <li>
-                Membership becomes active only after the approved fee is paid, the payment is verified and the application is
-                approved. The date of activation is the <strong>effective membership date</strong>.
+                Membership becomes active when the fee is paid: immediately for online payments, or once the foundation has verified a
+                payment made by other means. The date of activation is the <strong>effective membership date</strong>.
               </li>
               <li>The foundation may reject an application or suspend a membership in accordance with its approved rules.</li>
             </ul>

@@ -24,7 +24,7 @@ declare global {
 }
 
 export type CheckoutResult =
-  | { status: "paid"; reference: string | null; paymentId: string }
+  | { status: "paid"; reference: string | null; paymentId: string; membershipId?: string; certificateUrl?: string }
   | { status: "invalid"; message: string; errors: Record<string, string> }
   | { status: "dismissed" }
   | { status: "error"; message: string };
@@ -75,10 +75,10 @@ export async function payWithRazorpay(orderRequest: Record<string, unknown>): Pr
       handler: async (r: RazorpayHandlerResponse) => {
         try {
           const v = await fetch("/api/payments/razorpay/verify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(r) });
-          const body = (await v.json().catch(() => ({}))) as { ok?: boolean; message?: string; reference?: string | null };
+          const body = (await v.json().catch(() => ({}))) as { ok?: boolean; message?: string; reference?: string | null; membershipId?: string; certificateUrl?: string };
           resolve(
             v.ok && body.ok
-              ? { status: "paid", reference: body.reference ?? null, paymentId: r.razorpay_payment_id }
+              ? { status: "paid", reference: body.reference ?? null, paymentId: r.razorpay_payment_id, membershipId: body.membershipId, certificateUrl: body.certificateUrl }
               : { status: "error", message: body.message ?? "We could not confirm the payment yet. If money was debited, it will be confirmed automatically shortly." },
           );
         } catch {

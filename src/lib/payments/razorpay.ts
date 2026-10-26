@@ -74,3 +74,15 @@ export function verifyWebhookSignature(rawBody: string, signature: string) {
   const expected = createHmac("sha256", secret).update(rawBody).digest("hex");
   return safeEqualHex(expected, signature);
 }
+
+/**
+ * Token for downloading the membership certificate straight after an online payment, without signing in.
+ * Bound to one paid order and signed with the server secret, so it cannot be guessed or reused for another member.
+ */
+export function certificateToken(orderId: string) {
+  return createHmac("sha256", process.env.RAZORPAY_KEY_SECRET ?? "").update(`certificate:${orderId}`).digest("hex").slice(0, 40);
+}
+
+export function verifyCertificateToken(orderId: string, token: string) {
+  return /^[a-f0-9]{40}$/.test(token) && safeEqualHex(certificateToken(orderId), token);
+}

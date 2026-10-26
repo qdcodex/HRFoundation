@@ -67,7 +67,7 @@ export function MembershipFaq({ m }: { m: MembershipView }) {
       q: "When does the waiting period start?",
       a: (
         <>
-          On your effective membership date — the day your membership is activated after your payment is verified and approved. It ends {m.waitingPeriodMonths}{" "}
+          On your effective membership date — the day your membership is activated: straight away when you pay online, or when the foundation verifies a payment made by other means. It ends {m.waitingPeriodMonths}{" "}
           calendar months later. Your membership must stay active throughout.
         </>
       ),

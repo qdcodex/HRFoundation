@@ -32,12 +32,15 @@ export async function POST(request: Request) {
     if (!(await rateLimit(request, "membership", 3))) return json({ ok: false, message: "Too many submissions. Please try again later." }, 429);
 
     await connectDb();
-    const existing = await Member.exists({ mobile: d.mobile, status: { $nin: ["rejected"] } });
+    const existing = await Member.findOne({ mobile: d.mobile, status: { $nin: ["rejected"] } }).select("status").lean();
     if (existing) {
       return json(
         {
           ok: false,
-          message: "An application or membership already exists for this mobile number. Please contact the foundation if you need help.",
+          message:
+            existing.status === "pending_payment"
+              ? "An application with this mobile number is waiting for payment. Please use “Pay your membership fee online” with the application reference from your confirmation email, or contact the foundation."
+              : "An application or membership already exists for this mobile number. Please contact the foundation if you need help.",
           errors: { mobile: "This mobile number is already registered." },
         },
         409,

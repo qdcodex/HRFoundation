@@ -9,7 +9,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { PendingNote } from "@/components/ui/States";
-import { applicationStates, exceptionStates } from "@/content/membership";
+import { exceptionStates, joiningSteps } from "@/content/membership";
 import { toMembershipView } from "@/lib/membership-view";
 import { publicSettings } from "@/lib/settings";
 import { cmsPageMetadata } from "@/lib/metadata";
@@ -101,10 +101,10 @@ export default async function MembershipPage() {
             index="02"
             eyebrow="How it works"
             title="From application to active membership."
-            intro="Membership becomes active only after the approved fee is paid, the payment is verified and the application is approved."
+            intro="Apply, pay online and your membership is active straight away — with your certificate ready to download."
           />
-          <ol className="mt-12 grid gap-px overflow-hidden rounded-2xl bg-sage-deep md:grid-cols-5">
-            {applicationStates.map((s, i) => (
+          <ol className="mt-12 grid gap-px overflow-hidden rounded-2xl bg-sage-deep md:grid-cols-3">
+            {joiningSteps.map((s, i) => (
               <li key={s.key} className="bg-ivory p-6">
                 <span className="font-display text-sm font-bold text-gold-ink">{String(i + 1).padStart(2, "0")}</span>
                 <h3 className="mt-3 font-display text-lg font-bold text-forest">{s.label}</h3>
@@ -236,7 +236,7 @@ export default async function MembershipPage() {
                     <Link href="/membership/terms" className="text-emerald-ink underline underline-offset-2">
                       membership terms
                     </Link>{" "}
-                    first. Submitting this form does not activate membership or create any entitlement.
+                    first. Your membership is activated as soon as the fee is paid{online ? " online" : " and verified"}.
                   </>
                 }
               />

@@ -11,7 +11,8 @@ import type { MembershipView } from "@/lib/membership-view";
 import { membershipSchema } from "@/lib/validation";
 import { ageOn, parseIsoDate, todayInIndia } from "@/lib/waiting-period";
 import { CheckboxField, FormStatus, Honeypot, SelectField, TextAreaField, TextField } from "./FormField";
-import { PayMembershipFeeButton } from "./PayMembershipFee";
+import { MembershipWelcome, PayMembershipFeeButton } from "./PayMembershipFee";
+import { payWithRazorpay } from "./razorpay-checkout";
 import { useFormSubmit } from "./useFormSubmit";
 
 type Input = z.input<typeof membershipSchema>;
@@ -44,6 +45,12 @@ function Section({ step, title, description, children }: { step: number; title: 
 
 export function MembershipRegistrationForm({ m, onlinePayment = false }: { m: MembershipView; onlinePayment?: boolean }) {
   const [paidMobile, setPaidMobile] = useState("");
+  const [payment, setPayment] = useState<
+    | { kind: "none" }
+    | { kind: "paying" }
+    | { kind: "paid"; paymentId: string; membershipId?: string; certificateUrl?: string }
+    | { kind: "unpaid"; message: string | null }
+  >({ kind: "none" });
   const {
     register,
     handleSubmit,
@@ -74,16 +81,48 @@ export function MembershipRegistrationForm({ m, onlinePayment = false }: { m: Me
   const age = dob ? ageOn(dob, todayInIndia()) : null;
   const relationship = useWatch({ control, name: "nomineeRelationship" });
 
+  const payOnline = onlinePayment && Boolean(m.feeLabel);
+
   const onSubmit = handleSubmit(async (values) => {
-    if (await submit(values)) {
-      setPaidMobile(values.mobile);
-      reset();
-      window.scrollTo({ top: document.getElementById("register")?.offsetTop ?? 0, behavior: "smooth" });
-    }
+    const created = await submit(values);
+    if (!created) return;
+    setPaidMobile(values.mobile);
+    reset();
+    window.scrollTo({ top: document.getElementById("register")?.offsetTop ?? 0, behavior: "smooth" });
+    if (!payOnline) return;
+    // Go straight to Razorpay; the membership is activated as soon as the payment is confirmed.
+    setPayment({ kind: "paying" });
+    const r = await payWithRazorpay({ kind: "membership", applicationRef: created.reference, mobile: values.mobile });
+    if (r.status === "paid") setPayment({ kind: "paid", paymentId: r.paymentId, membershipId: r.membershipId, certificateUrl: r.certificateUrl });
+    else setPayment({ kind: "unpaid", message: r.status === "error" || r.status === "invalid" ? r.message : null });
   });
 
   if (!m.registrationOpen) {
     return <FormStatus state={{ kind: "error", message: "Membership applications are not open at the moment. Please check back later." }} />;
+  }
+
+  if (state.kind === "success" && payment.kind === "paid") return <MembershipWelcome {...payment} />;
+
+  if (state.kind === "success" && payment.kind === "paying") {
+    return (
+      <div className="flex items-center gap-3 rounded-2xl border border-line bg-white p-6 text-charcoal" role="status" aria-live="polite">
+        <Loader2 aria-hidden className="size-5 animate-spin text-forest" />
+        Opening secure payment for {m.feeLabel}…
+      </div>
+    );
+  }
+
+  if (state.kind === "success" && payment.kind === "unpaid") {
+    return (
+      <div className="space-y-4 rounded-2xl border border-gold/40 bg-gold-soft/30 p-6" role="status" aria-live="polite">
+        <p className="font-display text-lg font-bold text-forest">Complete your payment to activate your membership</p>
+        <p className="text-charcoal">
+          {payment.message ?? "The payment was not completed."} Your details are saved (reference{" "}
+          <strong className="font-mono">{state.reference}</strong>) — pay now and your membership and certificate are issued straight away.
+        </p>
+        <PayMembershipFeeButton applicationRef={state.reference} mobile={paidMobile} feeLabel={m.feeLabel!} />
+      </div>
+    );
   }
 
   if (state.kind === "success") {
@@ -216,9 +255,13 @@ export function MembershipRegistrationForm({ m, onlinePayment = false }: { m: Me
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <button type="submit" disabled={isSubmitting} className={buttonClasses("primary", "lg", "w-full sm:w-auto")}>
           {isSubmitting ? <Loader2 aria-hidden className="size-4 animate-spin" /> : <Send aria-hidden className="size-4" />}
-          {isSubmitting ? "Submitting…" : "Submit application"}
+          {isSubmitting ? "Submitting…" : payOnline ? `Continue to pay ${m.feeLabel}` : "Submit application"}
         </button>
-        <p className="text-sm text-muted">No payment is taken online. The foundation will contact you about the next steps.</p>
+        <p className="text-sm text-muted">
+          {payOnline
+            ? "You will pay securely with Razorpay (UPI, cards, net banking or wallets). Your membership and certificate are issued as soon as the payment succeeds."
+            : "No payment is taken online. The foundation will contact you about the next steps."}
+        </p>
       </div>
     </form>
   );

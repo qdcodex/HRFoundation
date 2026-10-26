@@ -3,14 +3,12 @@
 import { Types } from "mongoose";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { siteUrl } from "@/content/site";
 import { ActionError, runAction } from "@/lib/actions";
 import { audit } from "@/lib/audit";
 import { connectDb } from "@/lib/db/connect";
-import { nextSequence } from "@/lib/db/models/finance";
 import { Member, MembershipPayment, Nominee, NOMINEE_RELATIONSHIPS, PAYMENT_METHODS } from "@/lib/db/models/membership";
+import { activateMembership, sendLoginEmail } from "@/lib/domain/activate-member";
 import { reserveTxnRef, releaseTxnRef } from "@/lib/domain/txn";
-import { certificatePdf } from "@/lib/member-auth/certificate";
 import { issueTemporaryPassword } from "@/lib/member-auth/credentials";
 import { canSignIn } from "@/lib/member-auth/session";
 import { formatPaise, parseRupeesToPaise } from "@/lib/money";
@@ -18,7 +16,7 @@ import { notify } from "@/lib/notifications";
 import { createReference } from "@/lib/server/submissions";
 import { loadSettings } from "@/lib/settings";
 import { indianMobile } from "@/lib/validation";
-import { addMonthsClamped, ageOn, compareDates, formatLong, parseIsoDate, toIso, todayInIndia } from "@/lib/waiting-period";
+import { ageOn, compareDates, parseIsoDate, todayInIndia } from "@/lib/waiting-period";
 
 const objectId = z.string().refine((v) => Types.ObjectId.isValid(v), "Invalid record.");
 const isoDate = z.string().refine((v) => parseIsoDate(v) !== null, "Enter a valid date.");
@@ -178,7 +176,6 @@ export type LoginDetails = { membershipId: string; name: string; password: strin
 export async function decideApplication(input: unknown) {
   return runAction<typeof decisionSchema, LoginDetails>("membership:manage", decisionSchema, input, async (d, admin) => {
     await connectDb();
-    const rules = await loadSettings("membershipRules");
     const member = await Member.findById(d.memberId).lean();
     if (!member) throw new ActionError("Application not found.");
 
@@ -203,49 +200,9 @@ export async function decideApplication(input: unknown) {
     if (compareDates(eff, parseIsoDate(lastVerified.paidOn)!) < 0) {
       throw new ActionError("The effective date cannot be earlier than the verified payment date.", { effectiveDate: `Must be on or after ${lastVerified.paidOn}.` });
     }
-    const dob = parseIsoDate(member.dateOfBirth)!;
-    if (ageOn(dob, eff) < rules.minApplicantAge) throw new ActionError(`The applicant was under ${rules.minApplicantAge} on the effective date.`);
-
-    const seq = await nextSequence(`membershipId:${eff.year}`);
-    const membershipId = `HRF-M-${eff.year}-${String(seq).padStart(5, "0")}`;
-    const activated = await Member.findOneAndUpdate(
-      { _id: d.memberId, status: "pending_approval", membershipId: null },
-      {
-        $set: {
-          status: "active",
-          membershipId,
-          effectiveDate: d.effectiveDate,
-          activatedAt: new Date(),
-          activatedBy: new Types.ObjectId(admin.id),
-          statusReason: d.reason || null,
-          statusChangedAt: new Date(),
-        },
-      },
-      { returnDocument: "after" },
-    ).lean();
-    if (!activated) throw new ActionError("This application was already processed by someone else.");
-
-    const waitingEnds = addMonthsClamped(eff, rules.waitingPeriodMonths);
-    await audit(admin, {
-      action: "membership.activated",
-      entityType: "Member",
-      entityId: d.memberId,
-      summary: `Activated ${member.applicationRef} as ${membershipId}, effective ${d.effectiveDate}.`,
-      details: { membershipId, effectiveDate: d.effectiveDate, waitingEnds: toIso(waitingEnds) },
-    });
-    const password = await issueTemporaryPassword(activated._id);
-    await audit(admin, { action: "member_portal.login_issued", entityType: "Member", entityId: d.memberId, summary: `Issued member portal login for ${membershipId}.` });
-    const cert = await certificatePdf(activated._id, siteUrl).catch(() => null);
-    await notify(
-      "membership_activated",
-      activated.email,
-      { name: activated.fullName, membershipId, effectiveDate: formatLong(eff), waitingEnds: formatLong(waitingEnds) },
-      { entity: "Member", id: d.memberId },
-      { attachments: cert ? [{ filename: cert.filename, content: cert.bytes, contentType: "application/pdf" }] : undefined },
-    );
-    await sendLoginEmail(activated, membershipId, password, d.memberId);
+    const result = await activateMembership({ memberId: member._id, effective: eff, actor: admin, reason: d.reason });
     refresh(d.memberId);
-    return { ok: true, message: `Membership activated: ${membershipId}.`, data: { membershipId, name: activated.fullName, password } };
+    return { ok: true, message: `Membership activated: ${result.membershipId}.`, data: { membershipId: result.membershipId, name: result.name, password: result.password } };
   });
 }
 
@@ -253,16 +210,6 @@ export async function decideApplication(input: unknown) {
 
 const memberIdOnly = z.object({ memberId: objectId });
 
-/** Emails the login details to the member; the admin copy and the stored log omit the password. */
-function sendLoginEmail(member: { fullName: string; email?: string | null }, membershipId: string, password: string, memberId: string) {
-  return notify(
-    "member_login_issued",
-    member.email,
-    { name: member.fullName, membershipId, password, loginUrl: `${siteUrl}/member/login` },
-    { entity: "Member", id: memberId },
-    { privateVars: ["password"] },
-  );
-}
 
 export async function issueMemberLogin(input: unknown) {
   return runAction<typeof memberIdOnly, LoginDetails>("membership:manage", memberIdOnly, input, async (d, admin) => {

@@ -1,27 +1,58 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { CreditCard, Loader2, LockKeyhole } from "lucide-react";
+import { BadgeCheck, CreditCard, Download, Loader2, LockKeyhole } from "lucide-react";
 import { buttonClasses } from "@/components/ui/Button";
 import { FormStatus, TextField } from "./FormField";
 import { payWithRazorpay } from "./razorpay-checkout";
 
-type Status = { kind: "idle" } | { kind: "error"; message: string } | { kind: "done"; paymentId: string };
+type Paid = { paymentId: string; membershipId?: string; certificateUrl?: string };
+type Status = { kind: "idle" } | { kind: "error"; message: string } | ({ kind: "done" } & Paid);
 
-function Paid({ paymentId }: { paymentId: string }) {
+/** Shown after a successful online payment: the membership is active and the certificate is ready. */
+export function MembershipWelcome({ paymentId, membershipId, certificateUrl }: Paid) {
+  if (!membershipId || !certificateUrl) {
+    return (
+      <FormStatus
+        state={{
+          kind: "success",
+          title: "Membership fee received — thank you.",
+          body: (
+            <p>
+              Your payment (ID <strong className="font-mono">{paymentId}</strong>) has been confirmed. The foundation will complete your
+              membership shortly and send your membership ID, login details and certificate.
+            </p>
+          ),
+        }}
+      />
+    );
+  }
   return (
-    <FormStatus
-      state={{
-        kind: "success",
-        title: "Membership fee received — thank you.",
-        body: (
-          <p>
-            Your payment (ID <strong className="font-mono">{paymentId}</strong>) has been confirmed and your application is now with the
-            foundation for approval. You will receive your membership ID, login details and certificate once it is approved.
-          </p>
-        ),
-      }}
-    />
+    <div className="rounded-[1.75rem] border border-emerald/30 bg-sage p-6 sm:p-8" role="status" aria-live="polite">
+      <p className="flex items-center gap-2 font-display text-xl font-bold text-forest">
+        <BadgeCheck aria-hidden className="size-7 text-emerald" /> Welcome — your membership is active!
+      </p>
+      <dl className="mt-5 grid gap-4 sm:grid-cols-2">
+        <div className="rounded-2xl bg-white p-4 ring-1 ring-line">
+          <dt className="text-xs font-semibold tracking-wide text-muted uppercase">Membership ID</dt>
+          <dd className="mt-1 font-mono text-lg font-bold text-forest">{membershipId}</dd>
+        </div>
+        <div className="rounded-2xl bg-white p-4 ring-1 ring-line">
+          <dt className="text-xs font-semibold tracking-wide text-muted uppercase">Payment ID</dt>
+          <dd className="mt-1 font-mono text-sm text-charcoal">{paymentId}</dd>
+        </div>
+      </dl>
+      <a href={certificateUrl} target="_blank" rel="noopener" className={buttonClasses("primary", "lg", "mt-6 w-full sm:w-auto")}>
+        <Download aria-hidden className="size-4" /> View &amp; download membership certificate
+      </a>
+      <p className="mt-4 text-sm leading-relaxed text-charcoal">
+        Your certificate and member login details have also been sent to your email. Use them to sign in to the{" "}
+        <a href="/member/login" className="text-emerald-ink underline underline-offset-2">
+          member portal
+        </a>{" "}
+        at any time — and share them with your nominee. Your waiting period starts today.
+      </p>
+    </div>
   );
 }
 
@@ -42,7 +73,7 @@ function SecuredByRazorpay() {
 export function PayMembershipFeeButton({ applicationRef, mobile, feeLabel }: { applicationRef: string; mobile: string; feeLabel: string }) {
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
-  if (status.kind === "done") return <Paid paymentId={status.paymentId} />;
+  if (status.kind === "done") return <MembershipWelcome {...status} />;
   return (
     <div className="space-y-3">
       <button
@@ -54,7 +85,7 @@ export function PayMembershipFeeButton({ applicationRef, mobile, feeLabel }: { a
           setStatus({ kind: "idle" });
           const r = await payWithRazorpay({ kind: "membership", applicationRef, mobile });
           setBusy(false);
-          if (r.status === "paid") setStatus({ kind: "done", paymentId: r.paymentId });
+          if (r.status === "paid") setStatus({ kind: "done", paymentId: r.paymentId, membershipId: r.membershipId, certificateUrl: r.certificateUrl });
           else if (r.status === "error" || r.status === "invalid") setStatus({ kind: "error", message: r.message });
         }}
       >
@@ -81,14 +112,14 @@ export function PayMembershipFeeForm({ feeLabel, testMode }: { feeLabel: string;
     setStatus({ kind: "idle" });
     const r = await payWithRazorpay({ kind: "membership", applicationRef: String(data.get("applicationRef") ?? ""), mobile: String(data.get("mobile") ?? "") });
     setBusy(false);
-    if (r.status === "paid") setStatus({ kind: "done", paymentId: r.paymentId });
+    if (r.status === "paid") setStatus({ kind: "done", paymentId: r.paymentId, membershipId: r.membershipId, certificateUrl: r.certificateUrl });
     else if (r.status === "invalid") {
       setErrors(r.errors);
       setStatus({ kind: "error", message: r.message });
     } else if (r.status === "error") setStatus({ kind: "error", message: r.message });
   }
 
-  if (status.kind === "done") return <Paid paymentId={status.paymentId} />;
+  if (status.kind === "done") return <MembershipWelcome {...status} />;
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-6">
       {testMode && (

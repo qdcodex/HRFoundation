@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { isRazorpayEnabled, verifyCheckoutSignature } from "@/lib/payments/razorpay";
-import { settleRazorpayPayment } from "@/lib/payments/settle";
+import { certificateToken, isRazorpayEnabled, verifyCheckoutSignature } from "@/lib/payments/razorpay";
+import { membershipForOrder, settleRazorpayPayment } from "@/lib/payments/settle";
 import { json, rateLimit, readJson, unavailable } from "@/lib/server/submissions";
 
 const schema = z.object({
@@ -20,6 +20,13 @@ export async function POST(request: Request) {
     if (!(await rateLimit(request, "razorpay-verify", 20, 600))) return json({ ok: false, message: "Too many attempts. Please try again later." }, 429);
     const result = await settleRazorpayPayment(orderId, paymentId);
     if (!result.ok) return json({ ok: false, message: result.message }, 409);
+    if (result.kind === "membership") {
+      const m = await membershipForOrder(orderId);
+      if (m) {
+        const certificateUrl = `/api/payments/razorpay/certificate?order=${encodeURIComponent(orderId)}&t=${certificateToken(orderId)}`;
+        return json({ ok: true, kind: result.kind, reference: result.reference, paymentId, membershipId: m.membershipId, certificateUrl });
+      }
+    }
     return json({ ok: true, kind: result.kind, reference: result.reference, paymentId });
   } catch (error) {
     console.error("[razorpay verify]", error instanceof Error ? error.message : error);

@@ -4,6 +4,7 @@ import { audit } from "@/lib/audit";
 import { connectDb } from "@/lib/db/connect";
 import { Donation, GatewayOrder, type IGatewayOrder } from "@/lib/db/models/finance";
 import { Member, MembershipPayment } from "@/lib/db/models/membership";
+import { activateMembership } from "@/lib/domain/activate-member";
 import { reserveTxnRef } from "@/lib/domain/txn";
 import { formatPaise } from "@/lib/money";
 import { notify } from "@/lib/notifications";
@@ -14,6 +15,14 @@ import { capturePayment, fetchPayment, RazorpayError } from "./razorpay";
 const RAZORPAY = { id: null, name: "Razorpay (online payment)" } as const;
 
 export type SettleResult = { ok: true; kind: IGatewayOrder["kind"]; reference: string | null } | { ok: false; message: string };
+
+/** Membership ID issued when an online membership payment activated the membership. */
+export async function membershipForOrder(orderId: string) {
+  const order = await GatewayOrder.findOne({ orderId, kind: "membership", status: "paid" }).lean();
+  if (!order?.memberId) return null;
+  const member = await Member.findById(order.memberId).select("membershipId status").lean();
+  return member?.membershipId && member.status === "active" ? { memberId: member._id, membershipId: member.membershipId } : null;
+}
 
 /**
  * Confirms a Razorpay payment for one of our orders and records it — exactly once, whether called from
@@ -128,8 +137,24 @@ async function recordMembershipPayment(order: IGatewayOrder, paymentId: string) 
     action: "membership.payment_received_online",
     entityType: "Member",
     entityId: member._id.toString(),
-    summary: `Membership fee ${formatPaise(order.amountPaise)} paid online for ${member.applicationRef} via Razorpay (${paymentId})${moved ? "; application is now pending approval" : ""}.`,
+    summary: `Membership fee ${formatPaise(order.amountPaise)} paid online for ${member.applicationRef} via Razorpay (${paymentId}).`,
   });
+
+  // Online payments activate the membership straight away (client decision): membership ID,
+  // certificate and login are issued now. Offline payments still need staff verification and approval.
+  if (moved) {
+    try {
+      const result = await activateMembership({ memberId: member._id, effective: todayInIndia(), actor: RAZORPAY, reason: "Activated automatically after online payment" });
+      return { id, reference: member.applicationRef, membershipId: result.membershipId };
+    } catch (error) {
+      await audit(RAZORPAY, {
+        action: "membership.auto_activation_skipped",
+        entityType: "Member",
+        entityId: member._id.toString(),
+        summary: `Payment received but automatic activation was not possible: ${error instanceof Error ? error.message : String(error)}. Awaiting manual approval.`,
+      });
+    }
+  }
   await notify(
     "payment_verified",
     member.email,

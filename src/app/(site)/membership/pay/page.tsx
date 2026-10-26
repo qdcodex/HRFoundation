@@ -48,8 +48,8 @@ export default async function PayMembershipPage() {
             <Link href="/membership#register" className="font-semibold text-emerald-ink underline underline-offset-2">
               Apply for membership
             </Link>{" "}
-            first. After your payment is confirmed, the foundation reviews your application and sends your membership ID, login
-            details and certificate. The fee is refunded in full if your application is not approved — see our{" "}
+            first. As soon as your payment succeeds, your membership is active: you get your membership ID and certificate on this
+            page, and login details by email. Refunds follow our{" "}
             <Link href="/refund-policy" className="text-emerald-ink underline underline-offset-2">
               refund &amp; cancellation policy
             </Link>

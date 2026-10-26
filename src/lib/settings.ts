@@ -62,7 +62,7 @@ export const DEFAULT_TEMPLATES: Record<NotificationEvent, { enabled: boolean; su
   application_received: {
     enabled: true,
     subject: "We have received your membership application ({{reference}})",
-    body: "Dear {{name}},\n\nThank you for applying for membership of H R Foundation. Your application reference is {{reference}}. Your membership is not yet active; we will contact you about the next steps.\n\nH R Foundation",
+    body: "Dear {{name}},\n\nThank you for applying for membership of H R Foundation. Your application reference is {{reference}}.\n\nIf you paid the membership fee online, your membership is activated straight away and you will receive a separate email with your membership ID, certificate and login details. If you have not paid yet, you can pay at any time at https://www.hrfoundationindia.org/membership/pay using this reference, or the foundation will contact you about other ways to pay.\n\nH R Foundation",
   },
   payment_verified: {
     enabled: true,

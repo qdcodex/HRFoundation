@@ -10,6 +10,7 @@ import { donation } from "@/content/donation";
 import { cmsPageMetadata } from "@/lib/metadata";
 import { getPage } from "@/lib/cms";
 import { isRazorpayEnabled, isTestMode } from "@/lib/payments/razorpay";
+import { isRegistrationActive, publicSettings } from "@/lib/settings";
 
 export function generateMetadata() {
   return cmsPageMetadata("donate", "/donate");
@@ -18,6 +19,7 @@ export function generateMetadata() {
 export default async function DonatePage() {
   const page = await getPage("donate");
   const online = isRazorpayEnabled();
+  const has80G = isRegistrationActive((await publicSettings("taxExemption")).reg80G);
   const steps = [
     { title: "Scan or copy", text: "Scan the QR code with any UPI app (such as BHIM, Google Pay, PhonePe or Paytm), or copy the UPI ID." },
     { title: "Check and pay", text: "Confirm the UPI ID, enter the amount you wish to give and complete the payment in your app." },
@@ -85,7 +87,7 @@ export default async function DonatePage() {
             </div>
             <div className="lg:col-span-7">
               <div className="rounded-[2rem] bg-ivory p-6 ring-1 ring-line sm:p-8">
-                <OnlineDonationForm presets={donation.gateway.presetsInr} min={donation.gateway.minInr} max={donation.gateway.maxInr} testMode={isTestMode()} />
+                <OnlineDonationForm presets={donation.gateway.presetsInr} min={donation.gateway.minInr} max={donation.gateway.maxInr} testMode={isTestMode()} has80G={has80G} />
               </div>
             </div>
           </div>
@@ -127,8 +129,8 @@ export default async function DonatePage() {
               <BadgeInfo aria-hidden className="size-7 text-gold" />
               <h3 className="mt-5 font-display text-xl font-bold">Tax deductions</h3>
               <p className="mt-2 leading-relaxed text-ivory/80">
-                {donation.taxDeduction.approved
-                  ? "Details of tax-deduction eligibility are provided with your receipt."
+                {has80G
+                  ? "Donations are eligible for deduction under section 80G, subject to the conditions of that section. Your receipt comes with the foundation's 80G and 12A certificates."
                   : "Please do not assume your donation is tax-deductible. Information on eligibility will be published only after the relevant approval has been received and verified."}
               </p>
             </div>

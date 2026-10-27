@@ -24,9 +24,5 @@ export const donation = {
   },
   /** CLIENT TO CONFIRM: bank transfer details. null hides the section. */
   bankTransfer: null as null | { accountName: string; accountNumber: string; ifsc: string; bank: string; branch: string },
-  /**
-   * Tax-deduction status. Keep `approved: false` until an approval (e.g. under section 80G) is received
-   * and verified. Do not change wording to imply a deduction is available before then.
-   */
-  taxDeduction: { approved: false },
+  // 12A/80G: managed in Admin → Settings → 12A & 80G (registration numbers + approval PDFs).
 } as const;

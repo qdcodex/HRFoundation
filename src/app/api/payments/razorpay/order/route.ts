@@ -24,6 +24,8 @@ const schema = z.discriminatedUnion("kind", [
       .min(minInr, `The minimum online donation is ₹${minInr}.`)
       .max(maxInr, `For donations above ₹${maxInr.toLocaleString("en-IN")}, please contact the foundation.`),
     purpose: z.string().trim().max(120).default(""),
+    address: z.string().trim().max(300).default(""),
+    pan: z.union([z.literal(""), z.string().trim().toUpperCase().regex(/^[A-Z]{5}\d{4}[A-Z]$/, "Enter a valid PAN, e.g. ABCDE1234F, or leave it blank.")]).default(""),
     consent: z.literal(true, { message: "Please confirm to continue." }),
   }),
   z.object({
@@ -51,7 +53,7 @@ export async function POST(request: Request) {
       const amountPaise = d.amount * 100;
       const receipt = createReference("HRF-DO");
       const order = await createOrder({ amountPaise, receipt, notes: { kind: "donation", name: d.name.slice(0, 60), purpose: d.purpose.slice(0, 60) } });
-      await GatewayOrder.create({ orderId: order.id, kind: "donation", amountPaise, donor: { name: d.name, email: d.email, phone: d.phone || null, purpose: d.purpose || null } });
+      await GatewayOrder.create({ orderId: order.id, kind: "donation", amountPaise, donor: { name: d.name, email: d.email, phone: d.phone || null, purpose: d.purpose || null, address: d.address || null, pan: d.pan || null } });
       return json({
         ok: true,
         keyId: razorpayKeyId(),

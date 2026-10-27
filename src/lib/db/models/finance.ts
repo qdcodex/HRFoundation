@@ -22,6 +22,8 @@ export interface IDonation {
   donorEmail?: string;
   donorPhone?: string;
   donorAddress?: string;
+  /** Donor's PAN, given voluntarily for an 80G receipt / Form 10BD reporting. */
+  donorPan?: string;
   amountPaise: number;
   donatedOn: string;
   method: (typeof DONATION_METHODS)[number];
@@ -49,6 +51,7 @@ const DonationSchema = new Schema<IDonation>(
     donorEmail: { type: String, lowercase: true, trim: true, maxlength: 254 },
     donorPhone: { type: String, maxlength: 15 },
     donorAddress: { type: String, maxlength: 300 },
+    donorPan: { type: String, maxlength: 10 },
     amountPaise: { type: Number, required: true, min: 1, validate: Number.isInteger },
     donatedOn: { type: String, required: true, match: /^\d{4}-\d{2}-\d{2}$/, index: true },
     method: { type: String, enum: DONATION_METHODS, required: true },
@@ -70,6 +73,8 @@ DonationSchema.index({ amountPaise: 1, donatedOn: 1 });
 export const RECEIPT_STATUSES = ["issued", "cancelled"] as const;
 
 /** Receipt issued to an individual donor for one verified donation. Details are snapshotted at issue time. */
+type TaxReg = { number: string; validFrom: string; validTo: string };
+
 export interface IDonationReceipt {
   _id: Types.ObjectId;
   receiptNumber: string;
@@ -78,14 +83,18 @@ export interface IDonationReceipt {
   donorName: string;
   donorAddress?: string;
   donorEmail?: string;
+  donorPan?: string;
   amountPaise: number;
   donatedOn: string;
   method: string;
   transactionRef?: string | null;
   donationReference: string;
   issuedAt: Date;
-  issuedBy: Types.ObjectId;
+  /** Null when issued automatically for an online donation. */
+  issuedBy?: Types.ObjectId | null;
   issuedByName: string;
+  /** 12A/80G details as they stood when the receipt was issued (null = 80G not active then). */
+  tax?: { trustPan: string; reg12A: TaxReg | null; reg80G: TaxReg } | null;
   cancelledAt?: Date | null;
   cancelledBy?: Types.ObjectId | null;
   cancelReason?: string | null;
@@ -102,14 +111,24 @@ const DonationReceiptSchema = new Schema<IDonationReceipt>(
     donorName: { type: String, required: true },
     donorAddress: String,
     donorEmail: String,
+    donorPan: String,
     amountPaise: { type: Number, required: true },
     donatedOn: { type: String, required: true },
     method: { type: String, required: true },
     transactionRef: String,
     donationReference: { type: String, required: true },
     issuedAt: { type: Date, required: true },
-    issuedBy: { type: Schema.Types.ObjectId, ref: "AdminUser", required: true },
+    issuedBy: { type: Schema.Types.ObjectId, ref: "AdminUser", default: null },
     issuedByName: { type: String, required: true },
+    tax: {
+      type: {
+        trustPan: String,
+        reg12A: { type: { number: String, validFrom: String, validTo: String, _id: false }, default: null },
+        reg80G: { number: String, validFrom: String, validTo: String },
+        _id: false,
+      },
+      default: null,
+    },
     cancelledAt: { type: Date, default: null },
     cancelledBy: { type: Schema.Types.ObjectId, ref: "AdminUser", default: null },
     cancelReason: { type: String, default: null, maxlength: 500 },
@@ -139,7 +158,7 @@ export interface IGatewayOrder {
   kind: "donation" | "membership";
   amountPaise: number;
   status: "created" | "paid" | "failed";
-  donor?: { name: string; email?: string | null; phone?: string | null; purpose?: string | null } | null;
+  donor?: { name: string; email?: string | null; phone?: string | null; purpose?: string | null; address?: string | null; pan?: string | null } | null;
   memberId?: Types.ObjectId | null;
   paymentId?: string | null;
   paidAt?: Date | null;
@@ -158,7 +177,7 @@ const GatewayOrderSchema = new Schema<IGatewayOrder>(
     amountPaise: { type: Number, required: true, min: 100, validate: Number.isInteger },
     status: { type: String, enum: ["created", "paid", "failed"], default: "created", index: true },
     donor: {
-      type: { name: String, email: String, phone: String, purpose: String, _id: false },
+      type: { name: String, email: String, phone: String, purpose: String, address: String, pan: String, _id: false },
       default: null,
     },
     memberId: { type: Schema.Types.ObjectId, ref: "Member", default: null, index: true },

@@ -3,14 +3,14 @@
 import { Types } from "mongoose";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { ActionError, isDuplicateKey, runAction, type ActionResult } from "@/lib/actions";
+import { ActionError, runAction, type ActionResult } from "@/lib/actions";
 import { audit } from "@/lib/audit";
 import { connectDb } from "@/lib/db/connect";
-import { Donation, DonationReceipt, DONATION_METHODS, nextSequence, type DonationStatus, type IDonation } from "@/lib/db/models/finance";
+import { Donation, DonationReceipt, DONATION_METHODS, type DonationStatus, type IDonation } from "@/lib/db/models/finance";
 import { PAYMENT_METHOD_LABELS } from "@/lib/db/models/membership";
+import { emailDonationReceipt, issueDonationReceipt } from "@/lib/domain/receipts";
 import { reserveTxnRef, releaseTxnRef } from "@/lib/domain/txn";
 import { formatPaise, parseRupeesToPaise } from "@/lib/money";
-import { notify } from "@/lib/notifications";
 import { createReference } from "@/lib/server/submissions";
 import { compareDates, parseIsoDate, todayInIndia } from "@/lib/waiting-period";
 
@@ -167,60 +167,14 @@ export async function updateDonorDetails(input: unknown) {
 
 /* ---------- Receipts ---------- */
 
-function financialYear() {
-  const t = todayInIndia();
-  const start = t.month >= 4 ? t.year : t.year - 1;
-  return `${start}-${String((start + 1) % 100).padStart(2, "0")}`;
-}
-
-async function issueFor(donationId: string, admin: { id: string; name: string }, replaces?: Types.ObjectId) {
-  const donation = await Donation.findById(donationId).lean<IDonation>();
-  if (!donation) throw new ActionError("Donation not found.");
-  if (donation.status !== "verified") throw new ActionError("Receipts can only be issued for verified donations.");
-  if (!donation.donorName) throw new ActionError("Add the donor's name before issuing a receipt (anonymous donations cannot be receipted).");
-  const fy = financialYear();
-  const seq = await nextSequence(`receipt:${fy}`);
-  try {
-    return await new DonationReceipt({
-      receiptNumber: `HRF/${fy}/${String(seq).padStart(5, "0")}`,
-      donationId: donation._id,
-      status: "issued",
-      donorName: donation.donorName,
-      donorAddress: donation.donorAddress,
-      donorEmail: donation.donorEmail,
-      amountPaise: donation.amountPaise,
-      donatedOn: donation.donatedOn,
-      method: donation.method,
-      transactionRef: donation.transactionRef,
-      donationReference: donation.reference,
-      issuedAt: new Date(),
-      issuedBy: new Types.ObjectId(admin.id),
-      issuedByName: admin.name,
-      replacesReceiptId: replaces ?? null,
-    }).save();
-  } catch (error) {
-    if (isDuplicateKey(error)) throw new ActionError("A receipt has already been issued for this donation.");
-    throw error;
-  }
-}
-
-async function emailReceipt(receiptId: string) {
-  const r = await DonationReceipt.findById(receiptId).lean();
-  if (!r) return;
-  const result = await notify("receipt_issued", r.donorEmail, { name: r.donorName, receiptNumber: r.receiptNumber, amount: formatPaise(r.amountPaise) }, { entity: "DonationReceipt", id: receiptId });
-  const status = result === "sent" ? "sent" : result === "failed" ? "failed" : r.donorEmail ? "not_configured" : "not_sent";
-  await DonationReceipt.updateOne({ _id: receiptId }, { $set: { emailStatus: status } });
-  return status;
-}
-
 const issueSchema = z.object({ donationId: objectId, sendEmail: z.boolean().default(false) });
 
 export async function issueReceipt(input: unknown) {
   return runAction("receipts:manage", issueSchema, input, async (d, admin) => {
     await connectDb();
-    const receipt = await issueFor(d.donationId, admin);
+    const receipt = await issueDonationReceipt(d.donationId, admin);
     await audit(admin, { action: "receipts.issued", entityType: "DonationReceipt", entityId: receipt.id, summary: `Issued receipt ${receipt.receiptNumber} for ${formatPaise(receipt.amountPaise)}.` });
-    const emailed = d.sendEmail ? await emailReceipt(receipt.id) : null;
+    const emailed = d.sendEmail ? await emailDonationReceipt(receipt.id) : null;
     refresh(d.donationId);
     return { ok: true, message: `Receipt ${receipt.receiptNumber} issued.${emailed === "sent" ? " Emailed to the donor." : emailed ? " Email not sent (see receipt status)." : ""}` };
   });
@@ -240,7 +194,7 @@ export async function cancelReceipt(input: unknown) {
     await audit(admin, { action: "receipts.cancelled", entityType: "DonationReceipt", entityId: d.receiptId, summary: `Cancelled receipt ${cancelled.receiptNumber}: ${d.reason}` });
     let message = `Receipt ${cancelled.receiptNumber} cancelled.`;
     if (d.reissue) {
-      const replacement = await issueFor(cancelled.donationId.toString(), admin, cancelled._id);
+      const replacement = await issueDonationReceipt(cancelled.donationId.toString(), admin, cancelled._id);
       await audit(admin, {
         action: "receipts.reissued",
         entityType: "DonationReceipt",
@@ -260,7 +214,7 @@ export async function resendReceiptEmail(input: unknown) {
     const r = await DonationReceipt.findOne({ _id: d.receiptId, status: "issued" }).lean();
     if (!r) throw new ActionError("Only issued receipts can be emailed.");
     if (!r.donorEmail) throw new ActionError("There is no donor email on this receipt.");
-    const status = await emailReceipt(d.receiptId);
+    const status = await emailDonationReceipt(d.receiptId);
     await audit(admin, { action: "receipts.emailed", entityType: "DonationReceipt", entityId: d.receiptId, summary: `Receipt ${r.receiptNumber} email: ${status}.` });
     refresh(r.donationId.toString());
     if (status !== "sent") return { ok: false, error: status === "not_configured" ? "Email delivery is not configured." : "The email could not be sent." };

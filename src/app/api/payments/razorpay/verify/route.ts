@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { certificateToken, isRazorpayEnabled, verifyCheckoutSignature } from "@/lib/payments/razorpay";
-import { membershipForOrder, settleRazorpayPayment } from "@/lib/payments/settle";
+import { receiptDownloadLinks } from "@/lib/domain/receipts";
+import { membershipForOrder, receiptForOrder, settleRazorpayPayment } from "@/lib/payments/settle";
 import { json, rateLimit, readJson, unavailable } from "@/lib/server/submissions";
 
 const schema = z.object({
@@ -25,6 +26,12 @@ export async function POST(request: Request) {
       if (m) {
         const certificateUrl = `/api/payments/razorpay/certificate?order=${encodeURIComponent(orderId)}&t=${certificateToken(orderId)}`;
         return json({ ok: true, kind: result.kind, reference: result.reference, paymentId, membershipId: m.membershipId, certificateUrl });
+      }
+    }
+    if (result.kind === "donation") {
+      const receipt = await receiptForOrder(orderId);
+      if (receipt) {
+        return json({ ok: true, kind: result.kind, reference: result.reference, paymentId, receiptNumber: receipt.receiptNumber, documents: await receiptDownloadLinks(receipt) });
       }
     }
     return json({ ok: true, kind: result.kind, reference: result.reference, paymentId });

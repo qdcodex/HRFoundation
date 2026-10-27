@@ -34,6 +34,33 @@ export const membershipRulesSchema = z.object({
 });
 export type MembershipRules = z.output<typeof membershipRulesSchema>;
 
+const isoDateOrEmpty = z.union([z.literal(""), z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use a valid date.")]).default("");
+const registrationSchema = z.object({
+  number: z.string().trim().max(80).default(""),
+  validFrom: isoDateOrEmpty,
+  validTo: isoDateOrEmpty,
+  /** GridFS id (private bucket) of the uploaded approval certificate PDF. */
+  fileId: z.string().nullable().default(null),
+  fileName: z.string().max(200).nullable().default(null),
+});
+export type TaxRegistration = z.output<typeof registrationSchema>;
+
+/**
+ * Income-tax registrations of the trust. Nothing about 12A/80G is shown on receipts or sent to donors
+ * until the registration number AND the approval certificate PDF have been entered by an administrator.
+ */
+export const taxExemptionSchema = z.object({
+  trustPan: z.union([z.literal(""), z.string().trim().toUpperCase().regex(/^[A-Z]{5}\d{4}[A-Z]$/, "Enter a valid PAN, e.g. ABCDE1234F.")]).default(""),
+  reg12A: registrationSchema.default({ number: "", validFrom: "", validTo: "", fileId: null, fileName: null }),
+  reg80G: registrationSchema.default({ number: "", validFrom: "", validTo: "", fileId: null, fileName: null }),
+});
+export type TaxExemption = z.output<typeof taxExemptionSchema>;
+
+/** A registration is "active" only with both its number and its certificate PDF. */
+export function isRegistrationActive(r: TaxRegistration) {
+  return Boolean(r.number && r.fileId);
+}
+
 export const NOTIFICATION_EVENTS = {
   application_received: { label: "Membership application received", to: "applicant", vars: ["name", "reference"] },
   payment_verified: { label: "Membership payment verified", to: "member", vars: ["name", "reference", "amount"] },
@@ -102,7 +129,7 @@ export const DEFAULT_TEMPLATES: Record<NotificationEvent, { enabled: boolean; su
   receipt_issued: {
     enabled: true,
     subject: "Your donation receipt {{receiptNumber}}",
-    body: "Dear {{name}},\n\nThank you for your donation of {{amount}} to H R Foundation. Your receipt number is {{receiptNumber}}.\n\nH R Foundation",
+    body: "Dear {{name}},\n\nThank you for your donation of {{amount}} to H R Foundation. Your receipt number is {{receiptNumber}}.\n\nYour donation receipt is attached to this email, together with the foundation's 80G and 12A certificates where these apply. Please keep them for your records.\n\nH R Foundation",
   },
   claim_submitted: {
     enabled: true,
@@ -135,6 +162,7 @@ const defaults = {
     feePeriod: membershipDefaults.fee?.period ?? "",
   }),
   notifications: notificationSettingsSchema.parse({}),
+  taxExemption: taxExemptionSchema.parse({}),
 };
 
 /* ---------- Loaders ---------- */
@@ -144,13 +172,13 @@ export async function loadSettings<K extends keyof typeof defaults>(key: K): Pro
   if (!isDatabaseConfigured()) return defaults[key];
   await connectDb();
   const doc = await Setting.findById(key).lean();
-  const schema = { website: websiteSettingsSchema, membershipRules: membershipRulesSchema, notifications: notificationSettingsSchema }[key];
+  const schema = { website: websiteSettingsSchema, membershipRules: membershipRulesSchema, notifications: notificationSettingsSchema, taxExemption: taxExemptionSchema }[key];
   const parsed = schema.safeParse({ ...defaults[key], ...(doc?.value ?? {}) });
   return (parsed.success ? parsed.data : defaults[key]) as (typeof defaults)[K];
 }
 
 /** Cached read for the public website. Invalidated with the "settings" tag. */
-export async function publicSettings<K extends "website" | "membershipRules">(key: K): Promise<(typeof defaults)[K]> {
+export async function publicSettings<K extends "website" | "membershipRules" | "taxExemption">(key: K): Promise<(typeof defaults)[K]> {
   "use cache";
   cacheTag("settings");
   try {

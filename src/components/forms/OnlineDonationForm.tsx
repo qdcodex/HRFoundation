@@ -2,18 +2,36 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { CreditCard, Loader2 } from "lucide-react";
+import { CreditCard, Download, Loader2 } from "lucide-react";
 import { buttonClasses } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { CheckboxField, FormStatus, TextField } from "./FormField";
 import { payWithRazorpay } from "./razorpay-checkout";
 
 /** Card / net-banking / UPI / wallet donation through Razorpay Checkout. */
-export function OnlineDonationForm({ presets, min, max, testMode }: { presets: readonly number[]; min: number; max: number; testMode: boolean }) {
+type Doc = { doc: "receipt" | "12a" | "80g"; url: string };
+const DOC_LABELS: Record<Doc["doc"], string> = { receipt: "Donation receipt", "80g": "80G certificate", "12a": "12A certificate" };
+
+export function OnlineDonationForm({
+  presets,
+  min,
+  max,
+  testMode,
+  has80G = false,
+}: {
+  presets: readonly number[];
+  min: number;
+  max: number;
+  testMode: boolean;
+  /** When 80G is active, ask (optionally) for PAN and address for the 80G receipt. */
+  has80G?: boolean;
+}) {
   const [amount, setAmount] = useState<string>(String(presets[1] ?? presets[0] ?? ""));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState<{ kind: "idle" } | { kind: "error"; message: string } | { kind: "done"; reference: string | null; paymentId: string; amount: number }>({ kind: "idle" });
+  const [status, setStatus] = useState<{ kind: "idle" } | { kind: "error"; message: string } | { kind: "done"; reference: string | null; paymentId: string; amount: number; receiptNumber?: string; documents?: Doc[] }>({
+    kind: "idle",
+  });
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -24,6 +42,8 @@ export function OnlineDonationForm({ presets, min, max, testMode }: { presets: r
       email: String(data.get("email") ?? ""),
       phone: String(data.get("phone") ?? ""),
       purpose: String(data.get("purpose") ?? ""),
+      address: String(data.get("address") ?? ""),
+      pan: String(data.get("pan") ?? ""),
       amount: Number(amount),
       consent: data.get("consent") === "on",
     };
@@ -32,7 +52,8 @@ export function OnlineDonationForm({ presets, min, max, testMode }: { presets: r
     setStatus({ kind: "idle" });
     const result = await payWithRazorpay(request);
     setBusy(false);
-    if (result.status === "paid") setStatus({ kind: "done", reference: result.reference, paymentId: result.paymentId, amount: Number(amount) });
+    if (result.status === "paid")
+      setStatus({ kind: "done", reference: result.reference, paymentId: result.paymentId, amount: Number(amount), receiptNumber: result.receiptNumber, documents: result.documents });
     else if (result.status === "invalid") {
       setErrors(result.errors);
       setStatus({ kind: "error", message: result.message });
@@ -56,11 +77,27 @@ export function OnlineDonationForm({ presets, min, max, testMode }: { presets: r
                 ) : (
                   <>Your payment ID is <strong className="font-mono">{status.paymentId}</strong>.</>
                 )}{" "}
-                A confirmation has been sent to your email.
+                {status.receiptNumber ? (
+                  <>
+                    Your receipt <strong className="font-mono">{status.receiptNumber}</strong> has been sent to your email.
+                  </>
+                ) : (
+                  "A confirmation has been sent to your email."
+                )}
               </p>
-              <p className="mt-2 text-sm text-muted">
-                Need a receipt? <Link href="/contact" className="text-emerald-ink underline underline-offset-2">Contact us</Link> with this reference.
-              </p>
+              {status.documents?.length ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {status.documents.map((d) => (
+                    <a key={d.doc} href={d.url} target="_blank" rel="noopener" className={buttonClasses(d.doc === "receipt" ? "primary" : "outline", "md")}>
+                      <Download aria-hidden className="size-4" /> {DOC_LABELS[d.doc]}
+                    </a>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-2 text-sm text-muted">
+                  Need a receipt? <Link href="/contact" className="text-emerald-ink underline underline-offset-2">Contact us</Link> with this reference.
+                </p>
+              )}
             </>
           ),
         }}
@@ -115,6 +152,20 @@ export function OnlineDonationForm({ presets, min, max, testMode }: { presets: r
         <TextField label="Mobile number" name="phone" type="tel" inputMode="tel" autoComplete="tel-national" optional error={errors.phone} />
         <TextField label="Purpose" name="purpose" optional hint="For example: education support" error={errors.purpose} />
       </div>
+      {has80G && (
+        <div className="grid gap-6 sm:grid-cols-2">
+          <TextField
+            label="PAN (for 80G deduction)"
+            name="pan"
+            optional
+            autoCapitalize="characters"
+            maxLength={10}
+            hint="Needed if you want to claim a deduction under section 80G."
+            error={errors.pan}
+          />
+          <TextField label="Address (for your receipt)" name="address" optional autoComplete="street-address" error={errors.address} />
+        </div>
+      )}
       <CheckboxField
         name="consent"
         label={

@@ -1,6 +1,5 @@
 import "server-only";
 import { PDFDocument, rgb, StandardFonts, degrees } from "pdf-lib";
-import { donation as donationConfig } from "@/content/donation";
 import { registration, site } from "@/content/site";
 import type { IDonationReceipt } from "@/lib/db/models/finance";
 import { fmtDate } from "@/lib/format";
@@ -43,7 +42,9 @@ function rs(paise: number) {
 
 const METHOD: Record<string, string> = { upi: "UPI", bank_transfer: "Bank transfer", cash: "Cash", cheque: "Cheque", gateway: "Online" };
 
-export async function renderReceiptPdf(r: Pick<IDonationReceipt, "receiptNumber" | "status" | "donorName" | "donorAddress" | "amountPaise" | "donatedOn" | "method" | "transactionRef" | "donationReference" | "issuedAt" | "cancelReason">) {
+export async function renderReceiptPdf(
+  r: Pick<IDonationReceipt, "receiptNumber" | "status" | "donorName" | "donorAddress" | "amountPaise" | "donatedOn" | "method" | "transactionRef" | "donationReference" | "issuedAt" | "cancelReason" | "tax" | "donorPan">,
+) {
   const pdf = await PDFDocument.create();
   pdf.setTitle(`Donation receipt ${r.receiptNumber}`);
   pdf.setAuthor(site.name);
@@ -95,6 +96,7 @@ export async function renderReceiptPdf(r: Pick<IDonationReceipt, "receiptNumber"
     ["Mode of payment", METHOD[r.method] ?? r.method],
     ["Transaction reference", r.transactionRef || "-"],
     ["Donation reference", r.donationReference],
+    ...(r.donorPan ? ([["PAN of donor", r.donorPan]] as [string, string][]) : []),
   ];
   for (const [k, v] of rows) {
     text(k, { color: muted });
@@ -103,14 +105,39 @@ export async function renderReceiptPdf(r: Pick<IDonationReceipt, "receiptNumber"
   }
 
   y -= 16;
+  // 80G/12A wording appears only when the receipt recorded an active 80G approval at the time of issue.
+  if (r.tax) {
+    y -= 4;
+    text("Income-tax registrations", { f: bold, color: forest });
+    y -= 18;
+    const period = (v: { validFrom: string; validTo: string }) =>
+      v.validFrom || v.validTo ? ` (valid ${v.validFrom ? `from ${fmtDate(v.validFrom)}` : ""}${v.validTo ? ` to ${fmtDate(v.validTo)}` : ""})` : "";
+    const taxRows: [string, string][] = [
+      ...(r.tax.trustPan ? ([["PAN of the trust", r.tax.trustPan]] as [string, string][]) : []),
+      ["80G approval no.", `${r.tax.reg80G.number}${period(r.tax.reg80G)}`],
+      ...(r.tax.reg12A ? ([["12A registration no.", `${r.tax.reg12A.number}${period(r.tax.reg12A)}`]] as [string, string][]) : []),
+    ];
+    for (const [k, v] of taxRows) {
+      text(k, { color: muted, size: 10 });
+      text(v.slice(0, 70), { x: 220, size: 10 });
+      y -= 18;
+    }
+    y -= 8;
+  }
+
   const notes = [
     "This receipt acknowledges a voluntary donation received by H R Foundation.",
-    donationConfig.taxDeduction.approved ? "" : "This receipt does not state or certify eligibility for any income-tax deduction.",
+    r.tax
+      ? "This donation is eligible for deduction under section 80G of the Income-tax Act, 1961, subject to the conditions of that section. Cash donations above Rs. 2,000 are not eligible."
+      : "This receipt does not state or certify eligibility for any income-tax deduction.",
+    r.tax ? "The 80G and 12A approval certificates are provided with this receipt." : "",
     "This is a receipt issued to an individual donor and is not a registration or approval certificate of the foundation.",
   ].filter(Boolean);
   for (const n of notes) {
-    text(n, { size: 9, color: muted });
-    y -= 13;
+    for (const line of n.match(/.{1,110}(\s|$)/g) ?? [n]) {
+      text(line.trim(), { size: 9, color: muted });
+      y -= 13;
+    }
   }
 
   y = 150;

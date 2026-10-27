@@ -2,9 +2,10 @@ import "server-only";
 import { Types } from "mongoose";
 import { audit } from "@/lib/audit";
 import { connectDb } from "@/lib/db/connect";
-import { Donation, GatewayOrder, type IGatewayOrder } from "@/lib/db/models/finance";
+import { Donation, DonationReceipt, GatewayOrder, type IDonationReceipt, type IGatewayOrder } from "@/lib/db/models/finance";
 import { Member, MembershipPayment } from "@/lib/db/models/membership";
 import { activateMembership } from "@/lib/domain/activate-member";
+import { emailDonationReceipt, issueDonationReceipt } from "@/lib/domain/receipts";
 import { reserveTxnRef } from "@/lib/domain/txn";
 import { formatPaise } from "@/lib/money";
 import { notify } from "@/lib/notifications";
@@ -15,6 +16,13 @@ import { capturePayment, fetchPayment, RazorpayError } from "./razorpay";
 const RAZORPAY = { id: null, name: "Razorpay (online payment)" } as const;
 
 export type SettleResult = { ok: true; kind: IGatewayOrder["kind"]; reference: string | null } | { ok: false; message: string };
+
+/** The receipt issued for an online donation order, if any. */
+export async function receiptForOrder(orderId: string) {
+  const order = await GatewayOrder.findOne({ orderId, kind: "donation", status: "paid" }).lean();
+  if (!order?.resultId) return null;
+  return DonationReceipt.findOne({ donationId: order.resultId, status: "issued" }).lean<IDonationReceipt>();
+}
 
 /** Membership ID issued when an online membership payment activated the membership. */
 export async function membershipForOrder(orderId: string) {
@@ -86,6 +94,8 @@ async function recordDonation(order: IGatewayOrder, paymentId: string, method?: 
     donorName: donor.name || undefined,
     donorEmail: donor.email || undefined,
     donorPhone: donor.phone || undefined,
+    donorAddress: donor.address || undefined,
+    donorPan: donor.pan || undefined,
     purpose: donor.purpose || undefined,
     amountPaise: order.amountPaise,
     donatedOn: toIso(todayInIndia()),
@@ -103,12 +113,21 @@ async function recordDonation(order: IGatewayOrder, paymentId: string, method?: 
     entityId: donation.id,
     summary: `Online donation ${donation.reference} of ${formatPaise(order.amountPaise)} received via Razorpay (${paymentId}).`,
   });
-  await notify(
-    "donation_received",
-    donor.email,
-    { name: donor.name || "Friend", amount: formatPaise(order.amountPaise), reference: donation.reference, paymentId },
-    { entity: "Donation", id: donation.id },
-  );
+  // Online donations are already verified by Razorpay, so the receipt is issued and emailed straight away
+  // (with the 12A/80G certificates when 80G is active). If that fails, the donor still gets a thank-you email.
+  try {
+    const receipt = await issueDonationReceipt(donation._id, RAZORPAY);
+    await audit(RAZORPAY, { action: "receipts.issued", entityType: "DonationReceipt", entityId: receipt.id, summary: `Issued receipt ${receipt.receiptNumber} automatically for online donation ${donation.reference}.` });
+    await emailDonationReceipt(receipt.id);
+  } catch (error) {
+    console.error("[auto receipt]", donation.reference, error instanceof Error ? error.message : error);
+    await notify(
+      "donation_received",
+      donor.email,
+      { name: donor.name || "Friend", amount: formatPaise(order.amountPaise), reference: donation.reference, paymentId },
+      { entity: "Donation", id: donation.id },
+    );
+  }
   return { id, reference: donation.reference };
 }
 

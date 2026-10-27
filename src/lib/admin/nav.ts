@@ -49,6 +49,7 @@ export const ADMIN_NAV: NavSection[] = [
       { label: "Website Settings", href: "/admin/settings/website", icon: "settings", any: ["settings:manage"] },
       { label: "Membership Rules", href: "/admin/settings/membership-rules", icon: "scroll-text", any: ["rules:manage"] },
       { label: "Notification Settings", href: "/admin/settings/notifications", icon: "bell", any: ["settings:manage"] },
+      { label: "12A & 80G", href: "/admin/settings/tax-exemption", icon: "files", any: ["settings:manage"] },
     ],
   },
 ];

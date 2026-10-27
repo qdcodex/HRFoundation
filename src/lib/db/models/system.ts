@@ -57,7 +57,7 @@ EnquirySchema.index({ createdAt: -1 });
 /* ---------- Settings (single documents keyed by name) ---------- */
 
 export interface ISetting {
-  _id: "website" | "membershipRules" | "notifications";
+  _id: "website" | "membershipRules" | "notifications" | "taxExemption";
   value: Record<string, unknown>;
   updatedBy?: Types.ObjectId | null;
   updatedByName?: string | null;

@@ -135,6 +135,11 @@ export default async function DonatePage() {
                   ? `Donations are eligible for deduction under section 80G, subject to the conditions of that section. Your receipt comes with the foundation's ${has12A ? "80G and 12A certificates" : "80G approval certificate"}.`
                   : "Please do not assume your donation is tax-deductible. Information on eligibility will be published only after the relevant approval has been received and verified."}
               </p>
+              {has80G && (
+                <TextLink href="/save-tax" className="mt-5 text-gold hover:text-ivory">
+                  How 80G works &amp; tax calculator
+                </TextLink>
+              )}
             </div>
           </div>
         </div>

@@ -130,7 +130,7 @@ export async function renderReceiptPdf(
     r.tax
       ? "This donation is eligible for deduction under section 80G of the Income-tax Act, 1961, subject to the conditions of that section. Cash donations above Rs. 2,000 are not eligible."
       : "This receipt does not state or certify eligibility for any income-tax deduction.",
-    r.tax ? "The 80G and 12A approval certificates are provided with this receipt." : "",
+    r.tax ? (r.tax.reg12A ? "The 80G and 12A approval certificates are provided with this receipt." : "The 80G approval certificate is provided with this receipt.") : "",
     "This is a receipt issued to an individual donor and is not a registration or approval certificate of the foundation.",
   ].filter(Boolean);
   for (const n of notes) {

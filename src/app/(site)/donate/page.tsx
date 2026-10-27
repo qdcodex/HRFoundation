@@ -19,7 +19,9 @@ export function generateMetadata() {
 export default async function DonatePage() {
   const page = await getPage("donate");
   const online = isRazorpayEnabled();
-  const has80G = isRegistrationActive((await publicSettings("taxExemption")).reg80G);
+  const tax = await publicSettings("taxExemption");
+  const has80G = isRegistrationActive(tax.reg80G);
+  const has12A = isRegistrationActive(tax.reg12A);
   const steps = [
     { title: "Scan or copy", text: "Scan the QR code with any UPI app (such as BHIM, Google Pay, PhonePe or Paytm), or copy the UPI ID." },
     { title: "Check and pay", text: "Confirm the UPI ID, enter the amount you wish to give and complete the payment in your app." },
@@ -130,7 +132,7 @@ export default async function DonatePage() {
               <h3 className="mt-5 font-display text-xl font-bold">Tax deductions</h3>
               <p className="mt-2 leading-relaxed text-ivory/80">
                 {has80G
-                  ? "Donations are eligible for deduction under section 80G, subject to the conditions of that section. Your receipt comes with the foundation's 80G and 12A certificates."
+                  ? `Donations are eligible for deduction under section 80G, subject to the conditions of that section. Your receipt comes with the foundation's ${has12A ? "80G and 12A certificates" : "80G approval certificate"}.`
                   : "Please do not assume your donation is tax-deductible. Information on eligibility will be published only after the relevant approval has been received and verified."}
               </p>
             </div>

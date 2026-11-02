@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ChevronRight } from "lucide-react";
+import { breadcrumbJsonLd, JsonLd } from "@/lib/structured-data";
 import { cn } from "@/lib/utils";
 
 type Crumb = { label: string; href?: string };
@@ -59,6 +60,7 @@ export function PageHero({
               ))}
             </ol>
           </nav>
+          {crumbs.length > 0 && <JsonLd data={breadcrumbJsonLd(trail)} />}
           {eyebrow && <p className={cn("eyebrow mb-5", dark ? "text-gold" : "text-gold-ink")}>{eyebrow}</p>}
           <h1 className={cn("display-lg max-w-4xl", dark ? "text-ivory" : "text-forest")}>{title}</h1>
           {intro && <div className={cn("mt-6 max-w-2xl text-lg leading-relaxed sm:text-xl", dark ? "text-ivory/80" : "text-muted")}>{intro}</div>}

@@ -8,6 +8,8 @@ import { LoadingState } from "@/components/ui/States";
 import { formatDate } from "@/content/updates";
 import { getNewsArticle } from "@/lib/cms";
 import { pageMetadata } from "@/lib/metadata";
+import { JsonLd, organisationId } from "@/lib/structured-data";
+import { site, siteUrl } from "@/content/site";
 
 export async function generateMetadata({ params }: PageProps<"/news/[slug]">) {
   const { slug } = await params;
@@ -30,6 +32,19 @@ async function Article({ params }: { params: PageProps<"/news/[slug]">["params"]
   if (!article) notFound();
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "NewsArticle",
+          headline: article.title,
+          description: article.summary,
+          datePublished: article.date,
+          mainEntityOfPage: `${siteUrl}/news/${slug}`,
+          ...(article.imageUrl ? { image: `${siteUrl}${article.imageUrl}` } : {}),
+          author: { "@type": "Organization", name: site.name, url: siteUrl },
+          publisher: { "@id": organisationId },
+        }}
+      />
       <PageHero
         crumbs={[{ label: "News", href: "/news" }, { label: article.title }]}
         eyebrow={`${article.category} · ${formatDate(article.date)}`}

@@ -2,6 +2,7 @@ import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { MembershipView } from "@/lib/membership-view";
+import { faqJsonLd, JsonLd } from "@/lib/structured-data";
 
 /** Plain-language answers to the questions people ask before joining. Honest by design. */
 export function MembershipFaq({ m }: { m: MembershipView }) {
@@ -17,7 +18,7 @@ export function MembershipFaq({ m }: { m: MembershipView }) {
     },
     {
       q: "What does membership cost?",
-      a: m.feeLabel ? <>The membership fee is {m.feeLabel}. It is paid once — there is no renewal fee. You pay only after your application is received; the foundation will tell you how.</> : <>The fee is being finalised. Apply now and the foundation will contact you with the confirmed fee and how to pay before anything is charged.</>,
+      a: m.feeLabel ? <>The membership fee is {m.feeLabel}. It is paid once — there is no renewal fee. You pay online straight after submitting your application, by UPI, card or net banking.</> : <>The fee is being finalised. Apply now and the foundation will contact you with the confirmed fee and how to pay before anything is charged.</>,
     },
     {
       q: "What support could my family receive?",
@@ -43,7 +44,7 @@ export function MembershipFaq({ m }: { m: MembershipView }) {
       q: "Will I get a membership certificate?",
       a: (
         <>
-          Yes. Once your membership is activated, the foundation gives you login details for the{" "}
+          Yes. As soon as your membership is activated, you get your certificate on screen and login details for the{" "}
           <Link href="/member/login" className="text-emerald-ink underline underline-offset-2">member portal</Link>, where you can download your membership
           certificate at any time. Please share your login with your nominee so your family can submit a claim if ever needed.
         </>
@@ -101,18 +102,21 @@ export function MembershipFaq({ m }: { m: MembershipView }) {
   ];
 
   return (
-    <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-white">
-      {items.map((item) => (
-        <li key={item.q}>
-          <details className="group">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-display text-lg font-bold text-forest hover:bg-ivory/60 sm:px-6 [&::-webkit-details-marker]:hidden">
-              {item.q}
-              <ChevronDown aria-hidden className="size-5 shrink-0 transition-transform group-open:rotate-180" />
-            </summary>
-            <div className="px-5 pb-5 leading-relaxed text-muted sm:px-6">{item.a}</div>
-          </details>
-        </li>
-      ))}
-    </ul>
+    <>
+      <JsonLd data={faqJsonLd(items)} />
+      <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-white">
+        {items.map((item) => (
+          <li key={item.q}>
+            <details className="group">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-display text-lg font-bold text-forest hover:bg-ivory/60 sm:px-6 [&::-webkit-details-marker]:hidden">
+                {item.q}
+                <ChevronDown aria-hidden className="size-5 shrink-0 transition-transform group-open:rotate-180" />
+              </summary>
+              <div className="px-5 pb-5 leading-relaxed text-muted sm:px-6">{item.a}</div>
+            </details>
+          </li>
+        ))}
+      </ul>
+    </>
   );
 }

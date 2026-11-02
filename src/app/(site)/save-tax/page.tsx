@@ -11,6 +11,7 @@ import { donation } from "@/content/donation";
 import { registration, site, siteUrl } from "@/content/site";
 import { fmtDate } from "@/lib/format";
 import { pageMetadata } from "@/lib/metadata";
+import { faqJsonLd, JsonLd } from "@/lib/structured-data";
 import { isRazorpayEnabled, isTestMode } from "@/lib/payments/razorpay";
 import { isRegistrationActive, publicSettings } from "@/lib/settings";
 
@@ -281,6 +282,7 @@ export default async function SaveTaxPage() {
       <section className="bg-sage py-16 sm:py-24" aria-labelledby="faq-heading">
         <div className="container-site grid gap-10 lg:grid-cols-12">
           <div className="lg:col-span-4">
+            <JsonLd data={faqJsonLd(faq)} />
             <SectionHeading id="faq-heading" index="05" eyebrow="Questions" title="80G, explained." intro="Straight answers about tax benefits on your donation." />
           </div>
           <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-white lg:col-span-8">

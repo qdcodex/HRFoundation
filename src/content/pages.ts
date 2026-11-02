@@ -40,7 +40,7 @@ export const PAGE_DEFAULTS: PageDefaults[] = [
     title: "A charitable trust for a kinder, fairer tomorrow.",
     intro:
       "H R Foundation was registered in Peddapalli, Telangana, on 20 December 2024 to serve people through education, medical relief and the relief of the poor.",
-    seoTitle: "About Us",
+    seoTitle: "About Us — Charitable Trust in Peddapalli, Telangana",
     seoDescription:
       "About H R Foundation, a charitable trust registered in Peddapalli, Telangana, in December 2024 for education, medical relief, relief of the poor and other charitable objects.",
   },
@@ -51,7 +51,7 @@ export const PAGE_DEFAULTS: PageDefaults[] = [
     title: "Our charitable work, clearly labelled.",
     intro:
       "We show what the trust is registered to do, and we mark anything that is still proposed or awaiting confirmation. Nothing here is described as running until it actually is.",
-    seoTitle: "Services & Charitable Programmes",
+    seoTitle: "Charitable Programmes in Peddapalli, Telangana",
     seoDescription:
       "H R Foundation's charitable objectives and programmes in Telangana: education support, medical relief, community welfare and a proposed membership scheme.",
   },
@@ -62,7 +62,7 @@ export const PAGE_DEFAULTS: PageDefaults[] = [
     title: "Activities & initiatives.",
     intro:
       "This page lists activities approved by H R Foundation. Completed activities are shown only after they have taken place and been verified.",
-    seoTitle: "Activities & Initiatives",
+    seoTitle: "Activities & Initiatives in Peddapalli, Telangana",
     seoDescription: "Activities and initiatives of H R Foundation, Telangana. Only activities approved and verified by the foundation are listed.",
   },
   {
@@ -81,9 +81,9 @@ export const PAGE_DEFAULTS: PageDefaults[] = [
     title: "Your kindness can open a door for someone.",
     intro:
       "Donations help H R Foundation prepare and carry out its charitable work in education, medical relief and support for people facing hardship.",
-    seoTitle: "Donate",
+    seoTitle: "Donate Online — Save Tax under 80G",
     seoDescription:
-      "Support H R Foundation, a charitable trust in Telangana, by donating through its approved UPI QR code. Learn how to request a donation receipt.",
+      "Donate online to H R Foundation, a registered charitable trust in Peddapalli, Telangana. Instant receipt with our 80G and 12A certificates; save tax under 80G.",
   },
   {
     key: "membership",
@@ -92,7 +92,7 @@ export const PAGE_DEFAULTS: PageDefaults[] = [
     title: "Stand together as members of H R Foundation.",
     intro:
       "Membership is a way to belong to the foundation's community of support. A death-benefit provision for members' families is proposed, subject to formal approval.",
-    seoTitle: "Membership",
+    seoTitle: "Become a Member — Apply and Pay Online",
     seoDescription:
       "Join H R Foundation as a member. Read about the proposed membership scheme, the waiting period and the proposed death-benefit provision, then apply online.",
   },
@@ -112,7 +112,7 @@ export const PAGE_DEFAULTS: PageDefaults[] = [
     label: "Get involved",
     title: "Bring your time, skills and heart.",
     intro: "Good work grows when people come together. Tell us how you would like to help and we will be in touch as opportunities arise.",
-    seoTitle: "Get Involved — Volunteer or Partner",
+    seoTitle: "Volunteer or Partner with Us in Telangana",
     seoDescription: "Volunteer with H R Foundation or explore a partnership to support education, medical relief and community welfare in Telangana.",
   },
   {
@@ -121,7 +121,7 @@ export const PAGE_DEFAULTS: PageDefaults[] = [
     label: "Contact",
     title: "We would be glad to hear from you.",
     intro: "Ask a question, request a donation receipt, or tell us about a need in your community.",
-    seoTitle: "Contact Us",
+    seoTitle: "Contact Us — Peddapalli, Telangana",
     seoDescription: "Contact H R Foundation, Peddapalli, Telangana. Reach us directly by email or through our online enquiry form.",
   },
   {
